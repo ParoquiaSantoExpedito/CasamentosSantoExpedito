@@ -1,217 +1,357 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calendário 2026 - Maringá</title>
-  <style>
-    :root {
-      --terracota: #E2725B;
-      --caramelo: #FFD59A;
-      --fundo: #F4E1C1;
-      --texto: #3C2F2F;
-      --verde: #6ABD88;
-      --vermelho: #D94A4A;
-    }
-    body {
-      font-family: sans-serif;
-      background: var(--fundo);
-      color: var(--texto);
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      color: var(--terracota);
-    }
-    .ano {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      max-width: 1000px;
-      margin: auto;
-    }
-    .mes {
-      background: var(--caramelo);
-      padding: 10px;
-      border-radius: 5px;
-    }
-    .mes h2 {
-      text-align: center;
-      margin-top: 0;
-    }
-    .dias-semana {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      text-align: center;
-      font-weight: bold;
-    }
-    .dias {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 2px;
-    }
-    .dia {
-      padding: 6px;
-      text-align: center;
-      border-radius: 3px;
-      background: white;
-      cursor: default;
-      user-select: none;
-    }
-    .vazio {
-      background: transparent;
-      cursor: default;
-    }
-    .disponivel {
-      background: var(--verde) !important;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .indisponivel {
-      background: var(--vermelho) !important;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .controls, .legenda {
-      text-align: center;
-      margin: 20px auto;
-    }
-    input[type="password"], button {
-      padding: 6px 10px;
-      font-size: 16px;
-    }
-    #botaoSalvar {
-      margin-left: 10px;
-    }
-    .legenda span {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 4px;
-      color: white;
-      margin: 0 5px;
-    }
-    .verde { background: var(--verde); }
-    .vermelho { background: var(--vermelho); }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Calendário 2026 - Casamentos Maringá</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #8B5E3C; /* caramelo marrom suave */
+    color: #3E1F0D;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #7C4A23; /* terracota */
+    margin-bottom: 10px;
+  }
+  #calendario {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    max-width: 1000px;
+    margin: 0 auto 30px auto;
+    background-color: #A9746E; /* caramelo claro */
+    padding: 10px;
+    border-radius: 8px;
+  }
+  .dia-semana {
+    font-weight: bold;
+    text-align: center;
+    padding: 5px 0;
+    color: #7C4A23; /* terracota */
+  }
+  .dia {
+    min-height: 70px;
+    background-color: #D9B08C; /* caramelo */
+    border-radius: 5px;
+    padding: 5px;
+    cursor: pointer;
+    user-select: none;
+    text-align: right;
+    position: relative;
+    font-weight: normal;
+  }
+  .feriado {
+    background-color: #E07B52; /* terracota mais forte */
+    color: white;
+    font-weight: bold;
+  }
+  .feriado-santo {
+    background-color: #C37C3E; /* terracota santo, um tom diferente */
+    color: white;
+    font-weight: bold;
+  }
+  .disponivel {
+    background-color: #4B7A44 !important; /* verde disponível */
+    color: white;
+    font-weight: bold;
+  }
+  .indisponivel {
+    background-color: #B54141 !important; /* vermelho indisponível */
+    color: white;
+    font-weight: bold;
+  }
+  #modo-editor {
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: #A9746E;
+    padding: 15px;
+    border-radius: 8px;
+    color: #3E1F0D;
+  }
+  #senha-container {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  #senha {
+    padding: 5px;
+    font-size: 16px;
+    width: 150px;
+    border-radius: 4px;
+    border: 1px solid #7C4A23;
+  }
+  #botao-entrar, #botao-salvar {
+    padding: 7px 15px;
+    font-size: 16px;
+    margin-left: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #7C4A23;
+    color: white;
+    font-weight: bold;
+  }
+  #botao-entrar:hover, #botao-salvar:hover {
+    background-color: #5a3517;
+  }
+  #mensagem {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  #legenda {
+    max-width: 1000px;
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    color: #3E1F0D;
+  }
+  .legenda-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+  }
+  .legenda-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+  }
+  .leg-feriado {
+    background-color: #E07B52;
+  }
+  .leg-feriado-santo {
+    background-color: #C37C3E;
+  }
+  .leg-disponivel {
+    background-color: #4B7A44;
+  }
+  .leg-indisponivel {
+    background-color: #B54141;
+  }
+</style>
 </head>
 <body>
 
-  <h1>Calendário 2026 – Maringá</h1>
-  <div class="ano" id="calendario"></div>
+<h1>Calendário 2026 - Casamentos Maringá</h1>
 
-  <div class="controls">
-    <input type="password" id="senha" placeholder="Senha do editor" />
-    <button id="btnEntrar">Entrar</button>
-    <span id="msg"></span>
-    <button id="botaoSalvar" disabled>Salvar alterações</button>
+<div id="calendario"></div>
+
+<div id="legenda">
+  <div class="legenda-item"><div class="legenda-color leg-feriado"></div>Feriado</div>
+  <div class="legenda-item"><div class="legenda-color leg-feriado-santo"></div>Feriado Santo</div>
+  <div class="legenda-item"><div class="legenda-color leg-disponivel"></div>Sábado Disponível</div>
+  <div class="legenda-item"><div class="legenda-color leg-indisponivel"></div>Sábado Indisponível</div>
+</div>
+
+<div id="modo-editor">
+  <div id="senha-container">
+    <input type="password" id="senha" placeholder="Digite a senha para editar" />
+    <button id="botao-entrar">Entrar</button>
   </div>
-
-  <div class="legenda">
-    <span class="verde">Disponível</span>
-    <span class="vermelho">Indisponível</span>
+  <div id="editor-controles" style="display:none; text-align:center; margin-top:10px;">
+    <button id="botao-salvar">Salvar alterações</button>
+    <div id="mensagem"></div>
   </div>
+</div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<!-- Firebase compat libs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
-  <script>
-    const meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-    const diasSemana = ['D','S','T','Q','Q','S','S'];
-    const ano = 2026;
-    const cal = document.getElementById('calendario');
-    let estados = {};
-    let editor = false;
+<script>
+  // Sua configuração Firebase:
+  const firebaseConfig = {
+    apiKey: "AIzaSyCNhoW4B6EkIe4jCp8grJiXGNRer6Q9tNs",
+    authDomain: "calendariodecasamentos2026.firebaseapp.com",
+    databaseURL: "https://calendariodecasamentos2026-default-rtdb.firebaseio.com/",
+    projectId: "calendariodecasamentos2026",
+    storageBucket: "calendariodecasamentos2026.appspot.com",
+    messagingSenderId: "610947771106",
+    appId: "1:610947771106:web:b3213b288ccb647c9a4cbb"
+  };
 
-    // Cole aqui sua config do Firebase
-    const firebaseConfig = {
-      apiKey: "COLE_AQUI",
-      authDomain: "COLE_AQUI",
-      databaseURL: "COLE_AQUI",
-      projectId: "COLE_AQUI",
-      storageBucket: "COLE_AQUI",
-      messagingSenderId: "COLE_AQUI",
-      appId: "COLE_AQUI"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  // Inicializa Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    function criarCalendario() {
-      cal.innerHTML = '';
-      for (let m = 0; m < 12; m++) {
-        const div = document.createElement('div');
-        div.className = 'mes';
-        div.innerHTML = `<h2>${meses[m]}</h2><div class="dias-semana">${diasSemana.map(d => `<div>${d}</div>`).join('')}</div>`;
-        const grid = document.createElement('div');
-        grid.className = 'dias';
-        const primeiroDia = new Date(ano, m, 1).getDay();
-        const totalDias = new Date(ano, m + 1, 0).getDate();
+  const ano = 2026;
+  const calendarioEl = document.getElementById('calendario');
+  const senhaInput = document.getElementById('senha');
+  const botaoEntrar = document.getElementById('botao-entrar');
+  const editorControles = document.getElementById('editor-controles');
+  const botaoSalvar = document.getElementById('botao-salvar');
+  const mensagemEl = document.getElementById('mensagem');
+  const senhaCorreta = "1904";
+  let modoEditor = false;
+  let estados = {}; // salva o status dos sábados
 
-        for (let i = 0; i < primeiroDia; i++) {
-          grid.innerHTML += `<div class="dia vazio"></div>`;
-        }
+  // Feriados Maringá e nacionais 2026 (YYYY-MM-DD)
+  const feriados = {
+    "2026-01-01": { nome: "Confraternização Universal", tipo: "feriado" },
+    "2026-02-17": { nome: "Carnaval", tipo: "feriado" },
+    "2026-02-18": { nome: "Carnaval", tipo: "feriado" },
+    "2026-04-02": { nome: "Sexta-feira Santa", tipo: "feriado-santo" },
+    "2026-04-21": { nome: "Tiradentes", tipo: "feriado" },
+    "2026-05-01": { nome: "Dia do Trabalho", tipo: "feriado" },
+    "2026-06-11": { nome: "Corpus Christi", tipo: "feriado-santo" },
+    "2026-07-20": { nome: "Aniversário de Maringá", tipo: "feriado" },
+    "2026-09-07": { nome: "Independência do Brasil", tipo: "feriado" },
+    "2026-10-12": { nome: "Nossa Senhora Aparecida", tipo: "feriado-santo" },
+    "2026-11-02": { nome: "Finados", tipo: "feriado-santo" },
+    "2026-11-15": { nome: "Proclamação da República", tipo: "feriado" },
+    "2026-12-25": { nome: "Natal", tipo: "feriado-santo" }
+  };
 
-        for (let d = 1; d <= totalDias; d++) {
-          const diaId = `${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-          const el = document.createElement('div');
-          el.className = 'dia';
-          el.textContent = d;
-          if (estados[diaId]) {
-            el.classList.add(estados[diaId]);
-          }
+  const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
-          el.onclick = () => {
-            if (!editor) return;
-            if (el.classList.contains('disponivel')) {
-              el.classList.replace('disponivel', 'indisponivel');
-              estados[diaId] = 'indisponivel';
-            } else if (el.classList.contains('indisponivel')) {
-              el.classList.remove('indisponivel');
-              delete estados[diaId];
-            } else {
-              el.classList.add('disponivel');
-              estados[diaId] = 'disponivel';
-            }
-            document.getElementById('botaoSalvar').disabled = false;
-          };
-
-          grid.appendChild(el);
-        }
-
-        div.appendChild(grid);
-        cal.appendChild(div);
-      }
+  // Função pra criar o calendário na tela
+  function criarCalendario() {
+    calendarioEl.innerHTML = "";
+    // Cabeçalhos
+    for (let d = 0; d < 7; d++) {
+      const div = document.createElement('div');
+      div.classList.add('dia-semana');
+      div.textContent = diasSemana[d];
+      calendarioEl.appendChild(div);
     }
 
-    // Entrar como editor
-    document.getElementById('btnEntrar').onclick = () => {
-      const senha = document.getElementById('senha').value.trim();
-      if (senha === '1904') {
-        editor = true;
-        document.getElementById('msg').textContent = 'Editor ativado';
-      } else {
-        document.getElementById('msg').textContent = 'Senha incorreta';
+    const dataInicio = new Date(ano, 0, 1);
+    const diaSemanaInicio = dataInicio.getDay();
+
+    const diasMes = [31,28,31,30,31,30,31,31,30,31,30,31];
+
+    // espaços vazios antes do 1º dia do ano
+    for(let i=0; i < diaSemanaInicio; i++) {
+      const vazio = document.createElement('div');
+      vazio.classList.add('dia');
+      vazio.style.background = 'transparent';
+      vazio.style.cursor = 'default';
+      calendarioEl.appendChild(vazio);
+    }
+
+    for(let mes=0; mes < 12; mes++) {
+      for(let dia=1; dia <= diasMes[mes]; dia++) {
+        const dateStr = `${ano}-${String(mes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+        const div = document.createElement('div');
+        div.classList.add('dia');
+        div.textContent = dia;
+
+        if (feriados[dateStr]) {
+          if (feriados[dateStr].tipo === "feriado-santo") {
+            div.classList.add('feriado-santo');
+            div.title = feriados[dateStr].nome;
+          } else {
+            div.classList.add('feriado');
+            div.title = feriados[dateStr].nome;
+          }
+        }
+
+        const dataObj = new Date(ano, mes, dia);
+        if (dataObj.getDay() === 6) { // sábado
+          if (estados[dateStr] === "disponivel") {
+            div.classList.add('disponivel');
+          } else if (estados[dateStr] === "indisponivel") {
+            div.classList.add('indisponivel');
+          }
+          if (modoEditor) {
+            div.style.cursor = "pointer";
+            div.addEventListener('click', () => {
+              // Toggle estado
+              if (estados[dateStr] === "disponivel") {
+                estados[dateStr] = "indisponivel";
+              } else if (estados[dateStr] === "indisponivel") {
+                estados[dateStr] = null;
+                delete estados[dateStr];
+              } else {
+                estados[dateStr] = "disponivel";
+              }
+              criarCalendario();
+            });
+          } else {
+            div.style.cursor = "default";
+          }
+          div.title = (feriados[dateStr]?.nome ? feriados[dateStr].nome + " - " : "") + 
+            (estados[dateStr] ? estados[dateStr].toUpperCase() : "Sem info");
+        } else {
+          div.style.cursor = "default";
+        }
+
+        calendarioEl.appendChild(div);
       }
-    };
+    }
+  }
 
-    // Botão salvar
-    document.getElementById('botaoSalvar').onclick = () => {
-      db.ref('calendario2026').set(estados);
-      document.getElementById('botaoSalvar').disabled = true;
-    };
-
-    // Carrega do Firebase
-    db.ref('calendario2026').on('value', snapshot => {
+  // Função para carregar estados do banco
+  function carregarEstados() {
+    db.ref('estados').once('value').then(snapshot => {
       estados = snapshot.val() || {};
       criarCalendario();
     });
+  }
 
-    // Primeiro render
+  // Função para salvar estados no banco
+  function salvarEstados() {
+    botaoSalvar.disabled = true;
+    mensagemEl.textContent = "Salvando...";
+    db.ref('estados').set(estados)
+      .then(() => {
+        mensagemEl.textContent = "Salvo com sucesso!";
+      })
+      .catch(() => {
+        mensagemEl.textContent = "Erro ao salvar. Tente novamente.";
+      })
+      .finally(() => {
+        botaoSalvar.disabled = false;
+      });
+  }
+
+  // Função para ativar modo editor
+  function ativarModoEditor() {
+    modoEditor = true;
+    editorControles.style.display = "block";
+    senhaInput.disabled = true;
+    botaoEntrar.disabled = true;
     criarCalendario();
-  </script>
+  }
+
+  // Função para desativar modo editor
+  function desativarModoEditor() {
+    modoEditor = false;
+    editorControles.style.display = "none";
+    senhaInput.disabled = false;
+    botaoEntrar.disabled = false;
+    senhaInput.value = "";
+    criarCalendario();
+  }
+
+  botaoEntrar.addEventListener('click', () => {
+    if(senhaInput.value === senhaCorreta) {
+      ativarModoEditor();
+      mensagemEl.textContent = "";
+    } else {
+      mensagemEl.textContent = "Senha incorreta!";
+      setTimeout(() => mensagemEl.textContent = "", 3000);
+    }
+  });
+
+  botaoSalvar.addEventListener('click', () => {
+    salvarEstados();
+  });
+
+  // Atualiza calendário em tempo real com mudanças no Firebase
+  db.ref('estados').on('value', snapshot => {
+    estados = snapshot.val() || {};
+    criarCalendario();
+  });
+
+  // Inicialização
+  carregarEstados();
+</script>
 
 </body>
 </html>
