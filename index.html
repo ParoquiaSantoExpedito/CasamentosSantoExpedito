@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Calendário 2026 - Casamentos Maringá</title>
+<title>Calendário de Casamentos de 2026</title>
 
 <!-- Fonte moderna -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -167,7 +167,7 @@
 </head>
 <body>
 
-<h1>Calendário 2026 - Casamentos Maringá</h1>
+<h1>Calendário de Casamentos de 2026</h1>
 
 <div id="calendario"></div>
 
@@ -182,6 +182,7 @@
 
 <script>
   const ano = 2026;
+  const senhaCorreta = "19042010";
   const calendarioEl = document.getElementById("calendario");
 
   const mesesNomes = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
@@ -189,7 +190,6 @@
   const diasSemana = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 
   const feriados = {
-    // Feriados nacionais
     "2026-01-01": { nome: "Confraternização Universal", tipo: "feriado" },
     "2026-04-03": { nome: "Sexta-feira Santa", tipo: "feriado-santo" },
     "2026-04-21": { nome: "Tiradentes", tipo: "feriado" },
@@ -200,12 +200,8 @@
     "2026-11-15": { nome: "Proclamação da República", tipo: "feriado" },
     "2026-11-20": { nome: "Dia da Consciência Negra", tipo: "feriado" },
     "2026-12-25": { nome: "Natal", tipo: "feriado-santo" },
-
-    // Feriados municipais de Maringá
     "2026-05-10": { nome: "Aniversário de Maringá", tipo: "feriado-municipal" },
     "2026-08-15": { nome: "Nossa Senhora da Glória (Padroeira de Maringá)", tipo: "feriado-municipal" },
-
-    // Pontos facultativos
     "2026-02-16": { nome: "Carnaval (facultativo)", tipo: "facultativo" },
     "2026-02-17": { nome: "Carnaval (facultativo)", tipo: "facultativo" },
     "2026-02-18": { nome: "Quarta-feira de Cinzas até 14h (facultativo)", tipo: "facultativo" },
@@ -266,14 +262,19 @@
 
           div.style.cursor = "pointer";
           div.addEventListener("click", () => {
-            if (estados[dateStr] === "disponivel") {
-              estados[dateStr] = "indisponivel";
-            } else if (estados[dateStr] === "indisponivel") {
-              delete estados[dateStr];
-            } else {
-              estados[dateStr] = "disponivel";
+            const senha = prompt("Digite a senha para alterar:");
+            if (senha === senhaCorreta) {
+              if (estados[dateStr] === "disponivel") {
+                estados[dateStr] = "indisponivel";
+              } else if (estados[dateStr] === "indisponivel") {
+                delete estados[dateStr];
+              } else {
+                estados[dateStr] = "disponivel";
+              }
+              criarCalendario();
+            } else if (senha !== null) {
+              alert("Senha incorreta!");
             }
-            criarCalendario();
           });
         }
 
