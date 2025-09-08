@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Calendário 2026</title>
+  <title>Calendário 2026 - Maringá</title>
   <style>
     :root {
       --terracota: #E2725B;
       --caramelo: #FFD59A;
+      --terracota-escuro: #C14F3C;
+      --caramelo-escuro: #D9A066;
+      --facultativo: #FFF3DD;
       --fundo: #FFF8F0;
       --texto: #3C2F2F;
-      --borda: #D9A066;
     }
 
     body {
@@ -37,7 +39,7 @@
 
     .mes {
       background-color: var(--caramelo);
-      border: 2px solid var(--borda);
+      border: 2px solid var(--caramelo-escuro);
       border-radius: 8px;
       padding: 1rem;
       box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
@@ -75,12 +77,54 @@
     .vazio {
       background-color: transparent;
     }
+
+    .feriado-nacional {
+      background-color: var(--terracota-escuro);
+      color: white;
+      font-weight: bold;
+    }
+
+    .feriado-municipal {
+      background-color: var(--caramelo-escuro);
+      color: white;
+      font-weight: bold;
+    }
+
+    .facultativo {
+      background-color: var(--facultativo);
+      border: 1px dashed var(--caramelo-escuro);
+      font-style: italic;
+    }
+
+    .legenda {
+      max-width: 800px;
+      margin: 2rem auto 0 auto;
+      font-size: 0.9rem;
+    }
+
+    .legenda div {
+      margin-bottom: 0.5rem;
+    }
+
+    .cor-box {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+      border-radius: 3px;
+    }
   </style>
 </head>
 <body>
-  <h1>Calendário 2026</h1>
-  <div class="ano">
-    <!-- JavaScript vai preencher os meses aqui -->
+  <h1>Calendário 2026 – Maringá</h1>
+  <div class="ano" id="calendario"></div>
+
+  <div class="legenda">
+    <h3>Legenda:</h3>
+    <div><span class="cor-box" style="background-color:#C14F3C;"></span>Feriado Nacional</div>
+    <div><span class="cor-box" style="background-color:#D9A066;"></span>Feriado Municipal (Maringá)</div>
+    <div><span class="cor-box" style="background-color:#FFF3DD; border: 1px dashed #D9A066;"></span>Ponto Facultativo</div>
   </div>
 
   <script>
@@ -92,7 +136,36 @@
     const diasSemana = ["D", "S", "T", "Q", "Q", "S", "S"];
 
     const ano = 2026;
-    const containerAno = document.querySelector('.ano');
+    const containerAno = document.getElementById('calendario');
+
+    // Feriados e pontos facultativos
+    const feriados = {
+      // formato: 'MM-DD': 'tipo' ('nacional' | 'municipal' | 'facultativo')
+      '01-01': 'nacional',
+      '02-16': 'facultativo',
+      '02-17': 'facultativo',
+      '02-18': 'facultativo',
+      '04-03': 'nacional',
+      '04-21': 'nacional',
+      '05-01': 'nacional',
+      '05-10': 'municipal',
+      '06-04': 'facultativo',
+      '08-15': 'municipal',
+      '09-07': 'nacional',
+      '10-12': 'nacional',
+      '10-15': 'facultativo',
+      '10-28': 'facultativo',
+      '11-02': 'nacional',
+      '11-15': 'nacional',
+      '11-20': 'nacional',
+      '12-24': 'facultativo',
+      '12-25': 'nacional',
+      '12-31': 'facultativo'
+    };
+
+    function formatKey(month, day) {
+      return `${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
 
     function criarCalendarioMes(mesIndex) {
       const mesDiv = document.createElement('div');
@@ -117,17 +190,25 @@
       const primeiroDia = new Date(ano, mesIndex, 1).getDay();
       const diasNoMes = new Date(ano, mesIndex + 1, 0).getDate();
 
-      // Espaços em branco antes do primeiro dia
       for (let i = 0; i < primeiroDia; i++) {
         const vazio = document.createElement('div');
         vazio.className = 'dia vazio';
         diasDiv.appendChild(vazio);
       }
 
-      // Dias do mês
       for (let dia = 1; dia <= diasNoMes; dia++) {
         const diaDiv = document.createElement('div');
         diaDiv.className = 'dia';
+
+        const key = formatKey(mesIndex, dia);
+        if (feriados[key]) {
+          diaDiv.classList.add(
+            feriados[key] === 'nacional' ? 'feriado-nacional' :
+            feriados[key] === 'municipal' ? 'feriado-municipal' :
+            'facultativo'
+          );
+        }
+
         diaDiv.textContent = dia;
         diasDiv.appendChild(diaDiv);
       }
@@ -136,11 +217,9 @@
       containerAno.appendChild(mesDiv);
     }
 
-    // Criar calendário para todos os meses
     for (let i = 0; i < 12; i++) {
       criarCalendarioMes(i);
     }
   </script>
 </body>
 </html>
-
