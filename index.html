@@ -16,6 +16,8 @@
     --marrom: #8B5E3C;
     --verde: #4B7A44;
     --vermelho: #B54141;
+    --roxo: #6A5ACD;   /* feriado municipal */
+    --laranja: #FFA500; /* ponto facultativo */
   }
 
   body {
@@ -108,6 +110,16 @@
     color: #fff;
     font-weight: 600;
   }
+  .feriado-municipal {
+    background: var(--roxo);
+    color: #fff;
+    font-weight: 600;
+  }
+  .facultativo {
+    background: var(--laranja);
+    color: #fff;
+    font-weight: 600;
+  }
 
   /* Sábados */
   .disponivel {
@@ -147,6 +159,8 @@
 
   .leg-feriado { background: var(--terracota); }
   .leg-feriado-santo { background: #A0522D; }
+  .leg-feriado-municipal { background: var(--roxo); }
+  .leg-facultativo { background: var(--laranja); }
   .leg-disponivel { background: var(--verde); }
   .leg-indisponivel { background: var(--vermelho); }
 </style>
@@ -158,8 +172,10 @@
 <div id="calendario"></div>
 
 <div id="legenda">
-  <div class="legenda-item"><div class="legenda-color leg-feriado"></div>Feriado</div>
+  <div class="legenda-item"><div class="legenda-color leg-feriado"></div>Feriado Nacional</div>
   <div class="legenda-item"><div class="legenda-color leg-feriado-santo"></div>Feriado Santo</div>
+  <div class="legenda-item"><div class="legenda-color leg-feriado-municipal"></div>Feriado Municipal</div>
+  <div class="legenda-item"><div class="legenda-color leg-facultativo"></div>Ponto Facultativo</div>
   <div class="legenda-item"><div class="legenda-color leg-disponivel"></div>Sábado Disponível</div>
   <div class="legenda-item"><div class="legenda-color leg-indisponivel"></div>Sábado Indisponível</div>
 </div>
@@ -173,211 +189,31 @@
   const diasSemana = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 
   const feriados = {
+    // Feriados nacionais
     "2026-01-01": { nome: "Confraternização Universal", tipo: "feriado" },
-    "2026-02-17": { nome: "Carnaval", tipo: "feriado" },
-    "2026-02-18": { nome: "Carnaval", tipo: "feriado" },
-    "2026-04-02": { nome: "Sexta-feira Santa", tipo: "feriado-santo" },
+    "2026-04-03": { nome: "Sexta-feira Santa", tipo: "feriado-santo" },
     "2026-04-21": { nome: "Tiradentes", tipo: "feriado" },
     "2026-05-01": { nome: "Dia do Trabalho", tipo: "feriado" },
-    "2026-06-11": { nome: "Corpus Christi", tipo: "feriado-santo" },
-    "2026-07-20": { nome: "Aniversário de Maringá", tipo: "feriado" },
     "2026-09-07": { nome: "Independência do Brasil", tipo: "feriado" },
     "2026-10-12": { nome: "Nossa Senhora Aparecida", tipo: "feriado-santo" },
     "2026-11-02": { nome: "Finados", tipo: "feriado-santo" },
     "2026-11-15": { nome: "Proclamação da República", tipo: "feriado" },
-    "2026-12-25": { nome: "Natal", tipo: "feriado-santo" }
-  };
+    "2026-11-20": { nome: "Dia da Consciência Negra", tipo: "feriado" },
+    "2026-12-25": { nome: "Natal", tipo: "feriado-santo" },
 
-  let estados = {};
+    // Feriados municipais de Maringá
+    "2026-05-10": { nome: "Aniversário de Maringá", tipo: "feriado-municipal" },
+    "2026-08-15": { nome: "Nossa Senhora da Glória (Padroeira de Maringá)", tipo: "feriado-municipal" },
 
-  function criarCalendario() {
-    calendarioEl.innerHTML = "";
-
-    for (let mes = 0; mes < 12; mes++) {
-      const mesContainer = document.createElement("div");
-      mesContainer.classList.add("mes");
-
-      const titulo = document.createElement("h2");
-      titulo.textContent = mesesNomes[mes];
-      mesContainer.appendChild(titulo);
-
-      const grade = document.createElement("div");
-      grade.classList.add("grade");
-
-      // Cabeçalho dias da semana
-      for (let d = 0; d < 7; d++) {
-        const div = document.createElement("div");
-        div.classList.add("dia-semana");
-        div.textContent = diasSemana[d];
-        grade.appendChild(div);
-      }
-
-      // Espaços vazios antes do 1º dia
-      const primeiroDia = new Date(ano, mes, 1).getDay();
-      for (let i = 0; i < primeiroDia; i++) {
-        const vazio = document.createElement("div");
-        grade.appendChild(vazio);
-      }
-
-      // Dias do mês
-      for (let dia = 1; dia <= diasMes[mes]; dia++) {
-        const dateStr = `${ano}-${String(mes+1).padStart(2,"0")}-${String(dia).padStart(2,"0")}`;
-        const div = document.createElement("div");
-        div.classList.add("dia");
-        div.textContent = dia;
-
-        if (feriados[dateStr]) {
-          div.classList.add(feriados[dateStr].tipo);
-          div.title = feriados[dateStr].nome;
-        }
-
-        const dataObj = new Date(ano, mes, dia);
-        if (dataObj.getDay() === 6) {
-          if (estados[dateStr] === "disponivel") div.classList.add("disponivel");
-          if (estados[dateStr] === "indisponivel") div.classList.add("indisponivel");
-
-          div.style.cursor = "pointer";
-          div.addEventListener("click", () => {
-            if (estados[dateStr] === "disponivel") {
-              estados[dateStr] = "indisponivel";
-            } else if (estados[dateStr] === "indisponivel") {
-              delete estados[dateStr];
-            } else {
-              estados[dateStr] = "disponivel";
-            }
-            criarCalendario();
-          });
-        }
-
-        grade.appendChild(div);
-      }
-
-      mesContainer.appendChild(grade);
-      calendarioEl.appendChild(mesContainer);
-    }
-  }
-
-  criarCalendario();
-</script>
-
-</body>
-</html>
-    color: var(--cor-primaria);
-  }
-
-  .dia {
-    min-height: 80px;
-    background-color: var(--cor-secundaria);
-    border-radius: 8px;
-    padding: 6px;
-    cursor: default;
-    user-select: none;
-    text-align: right;
-    font-weight: 500;
-    font-size: 0.9rem;
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-start;
-    transition: transform 0.15s ease, background-color 0.15s ease;
-  }
-
-  .dia:hover {
-    transform: scale(1.05);
-  }
-
-  .feriado {
-    background-color: var(--cor-feriado);
-    color: white;
-    font-weight: bold;
-  }
-
-  .feriado-santo {
-    background-color: var(--cor-feriado-santo);
-    color: white;
-    font-weight: bold;
-  }
-
-  .disponivel {
-    background-color: var(--cor-disponivel) !important;
-    color: white;
-    font-weight: bold;
-  }
-
-  .indisponivel {
-    background-color: var(--cor-indisponivel) !important;
-    color: white;
-    font-weight: bold;
-  }
-
-  #legenda {
-    max-width: 900px;
-    margin: 0 auto 30px auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-  }
-
-  .legenda-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    color: #333;
-  }
-
-  .legenda-color {
-    width: 18px;
-    height: 18px;
-    border-radius: 4px;
-  }
-
-  .leg-feriado { background-color: var(--cor-feriado); }
-  .leg-feriado-santo { background-color: var(--cor-feriado-santo); }
-  .leg-disponivel { background-color: var(--cor-disponivel); }
-  .leg-indisponivel { background-color: var(--cor-indisponivel); }
-
-  @media (max-width: 600px) {
-    .dia { min-height: 60px; font-size: 0.8rem; }
-    .mes h2 { font-size: 1.2rem; }
-  }
-</style>
-</head>
-<body>
-
-<h1>Calendário 2026 - Casamentos Maringá</h1>
-
-<div id="calendario"></div>
-
-<div id="legenda">
-  <div class="legenda-item"><div class="legenda-color leg-feriado"></div>Feriado</div>
-  <div class="legenda-item"><div class="legenda-color leg-feriado-santo"></div>Feriado Santo</div>
-  <div class="legenda-item"><div class="legenda-color leg-disponivel"></div>Sábado Disponível</div>
-  <div class="legenda-item"><div class="legenda-color leg-indisponivel"></div>Sábado Indisponível</div>
-</div>
-
-<script>
-  const ano = 2026;
-  const calendarioEl = document.getElementById("calendario");
-
-  const mesesNomes = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-  const diasMes = [31,28,31,30,31,30,31,31,30,31,30,31]; // 2026 não é bissexto
-  const diasSemana = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
-
-  const feriados = {
-    "2026-01-01": { nome: "Confraternização Universal", tipo: "feriado" },
-    "2026-02-17": { nome: "Carnaval", tipo: "feriado" },
-    "2026-02-18": { nome: "Carnaval", tipo: "feriado" },
-    "2026-04-02": { nome: "Sexta-feira Santa", tipo: "feriado-santo" },
-    "2026-04-21": { nome: "Tiradentes", tipo: "feriado" },
-    "2026-05-01": { nome: "Dia do Trabalho", tipo: "feriado" },
-    "2026-06-11": { nome: "Corpus Christi", tipo: "feriado-santo" },
-    "2026-07-20": { nome: "Aniversário de Maringá", tipo: "feriado" },
-    "2026-09-07": { nome: "Independência do Brasil", tipo: "feriado" },
-    "2026-10-12": { nome: "Nossa Senhora Aparecida", tipo: "feriado-santo" },
-    "2026-11-02": { nome: "Finados", tipo: "feriado-santo" },
-    "2026-11-15": { nome: "Proclamação da República", tipo: "feriado" },
-    "2026-12-25": { nome: "Natal", tipo: "feriado-santo" }
+    // Pontos facultativos
+    "2026-02-16": { nome: "Carnaval (facultativo)", tipo: "facultativo" },
+    "2026-02-17": { nome: "Carnaval (facultativo)", tipo: "facultativo" },
+    "2026-02-18": { nome: "Quarta-feira de Cinzas até 14h (facultativo)", tipo: "facultativo" },
+    "2026-06-04": { nome: "Corpus Christi (facultativo)", tipo: "facultativo" },
+    "2026-10-15": { nome: "Dia do Professor (facultativo)", tipo: "facultativo" },
+    "2026-10-28": { nome: "Dia do Servidor Público (facultativo)", tipo: "facultativo" },
+    "2026-12-24": { nome: "Véspera de Natal após 14h (facultativo)", tipo: "facultativo" },
+    "2026-12-31": { nome: "Véspera de Ano Novo após 14h (facultativo)", tipo: "facultativo" }
   };
 
   let estados = {};
