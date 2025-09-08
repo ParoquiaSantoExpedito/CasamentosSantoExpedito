@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calendário de casamentos de 2026</title>
+  <title>Calendário 2026 - Maringá - Disponibilidade Casamento</title>
   <style>
     :root {
       --terracota: #E2725B;
@@ -28,6 +28,10 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       user-select: none;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
 
     h1 {
@@ -43,6 +47,7 @@
       gap: 2rem;
       max-width: 1200px;
       margin: 0 auto;
+      flex-grow: 1;
     }
 
     .mes {
@@ -147,10 +152,18 @@
       border: 2px solid #7A3B3B !important;
     }
 
+    /* Cursor e seleção para feriados não clicáveis */
+    .dia.feriado-nacional,
+    .dia.feriado-municipal,
+    .dia.facultativo,
+    .dia.feriado-religioso {
+      cursor: default;
+    }
+
     /* Legenda */
     .legenda {
       max-width: 800px;
-      margin: 2rem auto 0 auto;
+      margin: 2rem auto 1rem auto;
       font-size: 0.9rem;
       user-select: text;
     }
@@ -172,18 +185,60 @@
       box-sizing: border-box;
     }
 
-    /* Cursor e seleção para feriados não clicáveis */
-    .dia.feriado-nacional,
-    .dia.feriado-municipal,
-    .dia.facultativo,
-    .dia.feriado-religioso {
+    /* Área senha no rodapé */
+    footer {
+      background: #C14F3C;
+      padding: 1rem 2rem;
+      color: white;
+      text-align: center;
+      user-select: text;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+      margin-top: 2rem;
+      border-radius: 0 0 8px 8px;
+    }
+
+    footer input[type="password"] {
+      padding: 0.4rem 0.6rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      border: none;
+      margin-right: 0.6rem;
+      outline: none;
+      max-width: 120px;
+    }
+
+    footer button {
+      padding: 0.4rem 1rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      border: none;
+      background-color: var(--caramelo-escuro);
+      color: var(--terracota);
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    footer button:hover {
+      background-color: var(--terracota-escuro);
+      color: white;
+    }
+
+    footer .msg {
+      margin-top: 0.6rem;
+      font-weight: bold;
+    }
+
+    /* Desabilitar pointer-events no modo espectador para dias clicáveis */
+    .no-edit .dia:not(.feriado-nacional):not(.feriado-municipal):not(.facultativo):not(.feriado-religioso) {
+      pointer-events: none;
       cursor: default;
+      opacity: 0.85;
     }
   </style>
 </head>
 <body>
-  <h1>Calendário de casamentos de 2026</h1>
-  <div class="ano" id="calendario"></div>
+  <h1>Calendário 2026 – Maringá (Disponibilidade para Casamento)</h1>
+  <div class="ano no-edit" id="calendario"></div>
 
   <div class="legenda">
     <h3>Legenda:</h3>
@@ -194,6 +249,13 @@
     <div><span class="cor-box" style="background-color:#6ABD88;"></span>Disponível para Casamento</div>
     <div><span class="cor-box" style="background-color:#D94A4A;"></span>Indisponível para Casamento</div>
   </div>
+
+  <footer>
+    <label for="senhaInput">Digite a senha para ativar o modo editor:</label>
+    <input type="password" id="senhaInput" placeholder="Senha" autocomplete="off" />
+    <button id="entrarBtn">Entrar</button>
+    <div class="msg" id="msg"></div>
+  </footer>
 
 <script>
   const meses = [
@@ -234,120 +296,200 @@
   const storageKey = 'disponibilidadeCasamento2026';
 
   // Carrega estado salvo do localStorage
-  let disponibilidadeSalva = JSON.parse(localStorage.getItem(storageKey)) || {};
+  let disponibilidadeSalva = JSON.parse(localStorage.getItem(storageKey) || "{}");
 
-  // Formata chave para armazenamento e lookup: "MM-DD"
-  function formatKey(month, day) {
-    return `${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  // Estado do modo editor
+  let modoEditor = false;
+
+  // Função para criar o calendário
+  function criarCalendario() {
+    containerAno.innerHTML = '';
+
+    for(let m=0; m < 12; m++) {
+      const mesDiv = document.createElement('div');
+      mesDiv.className = 'mes';
+
+      // Título do mês
+      const titulo = document.createElement('h2');
+      titulo.textContent = meses[m];
+      mesDiv.appendChild(titulo);
+
+      // Dias da semana
+      const cabecalhoDias = document.createElement('div');
+      cabecalhoDias.className = 'dias-semana';
+      diasSemana.forEach(d => {
+        const diaLetra = document.createElement('div');
+        diaLetra.textContent = d;
+        cabecalhoDias.appendChild(diaLetra);
+      });
+      mesDiv.appendChild(cabecalhoDias);
+
+      // Dias do mês
+      const diasGrid = document.createElement('div');
+      diasGrid.className = 'dias';
+
+      const primeiroDia = new Date(ano, m, 1).getDay(); // 0 (dom) a 6 (sab)
+      const qtdDias = new Date(ano, m + 1, 0).getDate();
+
+      // Ajustar para nosso calendário domingo=0 ... já está certo
+
+      // Espaços vazios antes do primeiro dia
+      for(let i=0; i<primeiroDia; i++) {
+        const vazio = document.createElement('div');
+        vazio.className = 'dia vazio';
+        vazio.textContent = '';
+        diasGrid.appendChild(vazio);
+      }
+
+      // Criar dias
+      for(let d=1; d <= qtdDias; d++) {
+        const diaDiv = document.createElement('div');
+        diaDiv.className = 'dia';
+        diaDiv.textContent = d;
+
+        // Data no formato MM-DD (com zero à esquerda)
+        const mm = (m+1).toString().padStart(2, '0');
+        const dd = d.toString().padStart(2, '0');
+        const dataStr = `${mm}-${dd}`;
+
+        // Verifica se é sábado para possível casamento (vai ficar clicável se modoEditor = true)
+        const dataObj = new Date(ano, m, d);
+        const diaSemana = dataObj.getDay();
+
+        // Marca feriados
+        if(feriados[dataStr]) {
+          const tipos = feriados[dataStr];
+          if(tipos.includes('nacional')) {
+            diaDiv.classList.add('feriado-nacional');
+          }
+          if(tipos.includes('municipal')) {
+            diaDiv.classList.add('feriado-municipal');
+          }
+          if(tipos.includes('facultativo')) {
+            diaDiv.classList.add('facultativo');
+          }
+          if(tipos.includes('religioso')) {
+            diaDiv.classList.add('feriado-religioso');
+          }
+        }
+
+        // Só permite clicar para marcar disponibilidade em sábados que NÃO são feriados
+        // (Feriados não clicáveis)
+        if(diaSemana === 6 && !diaDiv.classList.contains('feriado-nacional') && !diaDiv.classList.contains('feriado-municipal') && !diaDiv.classList.contains('facultativo') && !diaDiv.classList.contains('feriado-religioso')) {
+          diaDiv.dataset.clicavel = 'true';
+          diaDiv.style.cursor = modoEditor ? 'pointer' : 'default';
+        } else {
+          diaDiv.dataset.clicavel = 'false';
+          diaDiv.style.cursor = 'default';
+        }
+
+        // Aplica estado salvo (disponível ou indisponível)
+        if(disponibilidadeSalva[dataStr] === 'disponivel') {
+          diaDiv.classList.add('disponivel');
+        } else if(disponibilidadeSalva[dataStr] === 'indisponivel') {
+          diaDiv.classList.add('indisponivel');
+        }
+
+        diasGrid.appendChild(diaDiv);
+      }
+
+      mesDiv.appendChild(diasGrid);
+      containerAno.appendChild(mesDiv);
+    }
   }
 
-  // Função para alternar estado de disponibilidade no clique
-  // Ciclo: neutro -> disponível -> indisponível -> neutro
-  function alternarEstado(diaDiv, chave) {
-    // Se feriado, não permite editar
-    if (diaDiv.classList.contains('feriado-nacional') ||
-        diaDiv.classList.contains('feriado-municipal') ||
-        diaDiv.classList.contains('facultativo') ||
-        diaDiv.classList.contains('feriado-religioso')) {
-      return;
-    }
+  criarCalendario();
 
-    // Remove estados anteriores
-    diaDiv.classList.remove('disponivel', 'indisponivel');
-
-    let estadoAtual = disponibilidadeSalva[chave] || 'neutro';
-
-    if (estadoAtual === 'neutro') {
-      diaDiv.classList.add('disponivel');
-      disponibilidadeSalva[chave] = 'disponivel';
-    } else if (estadoAtual === 'disponivel') {
-      diaDiv.classList.add('indisponivel');
-      disponibilidadeSalva[chave] = 'indisponivel';
+  // Atualiza os cursos e pointer-events conforme o modo
+  function atualizarModo() {
+    if(modoEditor) {
+      containerAno.classList.remove('no-edit');
+      // Atualiza cursores para dias clicáveis
+      document.querySelectorAll('.dia').forEach(diaDiv => {
+        if(diaDiv.dataset.clicavel === 'true') {
+          diaDiv.style.cursor = 'pointer';
+        } else {
+          diaDiv.style.cursor = 'default';
+        }
+      });
     } else {
-      // volta para neutro
+      containerAno.classList.add('no-edit');
+      // Desabilita clique e muda cursor
+      document.querySelectorAll('.dia').forEach(diaDiv => {
+        diaDiv.style.cursor = 'default';
+      });
+    }
+  }
+
+  atualizarModo();
+
+  // Interação clique para marcar dias (apenas modo editor)
+  containerAno.addEventListener('click', e => {
+    if(!modoEditor) return;
+
+    const el = e.target;
+    if(el.classList.contains('dia') && el.dataset.clicavel === 'true') {
+      // Alternar estados: nada -> disponivel -> indisponivel -> nada
+      if(el.classList.contains('disponivel')) {
+        el.classList.remove('disponivel');
+        el.classList.add('indisponivel');
+        salvarEstado(el, 'indisponivel');
+      } else if(el.classList.contains('indisponivel')) {
+        el.classList.remove('indisponivel');
+        salvarEstado(el, null);
+      } else {
+        el.classList.add('disponivel');
+        salvarEstado(el, 'disponivel');
+      }
+    }
+  });
+
+  // Salva estado no localStorage
+  function salvarEstado(diaEl, estado) {
+    // Identifica a data
+    // Precisamos do mês e dia
+    // Vamos pegar mês pelo elemento pai: h2 do mês, e o dia pelo texto do elemento
+    let mesEl = diaEl.closest('.mes').querySelector('h2').textContent;
+    let diaNum = diaEl.textContent;
+
+    let mesIdx = meses.indexOf(mesEl) + 1; // 1-based
+    let mm = mesIdx.toString().padStart(2, '0');
+    let dd = diaNum.toString().padStart(2, '0');
+    let chave = `${mm}-${dd}`;
+
+    if(estado) {
+      disponibilidadeSalva[chave] = estado;
+    } else {
       delete disponibilidadeSalva[chave];
     }
 
-    // Salva no localStorage
     localStorage.setItem(storageKey, JSON.stringify(disponibilidadeSalva));
   }
 
-  function criarCalendarioMes(mesIndex) {
-    const mesDiv = document.createElement('div');
-    mesDiv.className = 'mes';
+  // Login/Modo editor com senha
+  const senhaCorreta = '1904';
+  const senhaInput = document.getElementById('senhaInput');
+  const entrarBtn = document.getElementById('entrarBtn');
+  const msgDiv = document.getElementById('msg');
 
-    const titulo = document.createElement('h2');
-    titulo.textContent = meses[mesIndex];
-    mesDiv.appendChild(titulo);
-
-    const diasSemanaDiv = document.createElement('div');
-    diasSemanaDiv.className = 'dias-semana';
-    diasSemana.forEach(dia => {
-      const span = document.createElement('span');
-      span.textContent = dia;
-      diasSemanaDiv.appendChild(span);
-    });
-    mesDiv.appendChild(diasSemanaDiv);
-
-    const diasDiv = document.createElement('div');
-    diasDiv.className = 'dias';
-
-    const primeiroDia = new Date(ano, mesIndex, 1).getDay();
-    const diasNoMes = new Date(ano, mesIndex + 1, 0).getDate();
-
-    // Preenche espaços vazios antes do primeiro dia
-    for (let i = 0; i < primeiroDia; i++) {
-      const vazio = document.createElement('div');
-      vazio.className = 'dia vazio';
-      diasDiv.appendChild(vazio);
+  entrarBtn.addEventListener('click', () => {
+    const senha = senhaInput.value.trim();
+    if(senha === senhaCorreta) {
+      modoEditor = true;
+      atualizarModo();
+      msgDiv.style.color = '#6ABD88';
+      msgDiv.textContent = 'Modo editor ativado! Clique nos sábados para marcar disponibilidade.';
+      senhaInput.value = '';
+      senhaInput.disabled = true;
+      entrarBtn.disabled = true;
+    } else {
+      msgDiv.style.color = '#D94A4A';
+      msgDiv.textContent = 'Senha incorreta. Tente novamente.';
+      senhaInput.value = '';
+      senhaInput.focus();
     }
+  });
 
-    for (let dia = 1; dia <= diasNoMes; dia++) {
-      const diaDiv = document.createElement('div');
-      diaDiv.className = 'dia';
-      const key = formatKey(mesIndex, dia);
-
-      // Marca feriados com classes e estilos
-      if (feriados[key]) {
-        feriados[key].forEach(tipo => {
-          if (tipo === 'nacional') diaDiv.classList.add('feriado-nacional');
-          if (tipo === 'municipal') diaDiv.classList.add('feriado-municipal');
-          if (tipo === 'facultativo') diaDiv.classList.add('facultativo');
-          if (tipo === 'religioso') diaDiv.classList.add('feriado-religioso');
-        });
-      }
-
-      // Aplica estado salvo de disponibilidade
-      if (disponibilidadeSalva[key]) {
-        if (disponibilidadeSalva[key] === 'disponivel') {
-          diaDiv.classList.add('disponivel');
-        } else if (disponibilidadeSalva[key] === 'indisponivel') {
-          diaDiv.classList.add('indisponivel');
-        }
-      }
-
-      diaDiv.textContent = dia;
-
-      // Só permite clicar nos dias que NÃO são feriados para marcar disponibilidade
-      if (!diaDiv.classList.contains('feriado-nacional') &&
-          !diaDiv.classList.contains('feriado-municipal') &&
-          !diaDiv.classList.contains('facultativo') &&
-          !diaDiv.classList.contains('feriado-religioso')) {
-        diaDiv.addEventListener('click', () => {
-          alternarEstado(diaDiv, key);
-        });
-      }
-
-      diasDiv.appendChild(diaDiv);
-    }
-
-    mesDiv.appendChild(diasDiv);
-    containerAno.appendChild(mesDiv);
-  }
-
-  for (let i = 0; i < 12; i++) {
-    criarCalendarioMes(i);
-  }
 </script>
 </body>
 </html>
