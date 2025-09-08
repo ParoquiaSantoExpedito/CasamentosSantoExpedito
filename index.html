@@ -15,15 +15,25 @@
   h1 {
     text-align: center;
     color: #7C4A23; /* terracota */
-    margin-bottom: 10px;
+    margin-bottom: 20px;
   }
-  #calendario {
+  .mes {
+    max-width: 1000px;
+    margin: 0 auto 40px auto;
+  }
+  .mes h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #fff;
+    background: #7C4A23;
+    padding: 5px;
+    border-radius: 6px;
+  }
+  .grade {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 5px;
-    max-width: 1000px;
-    margin: 0 auto 30px auto;
-    background-color: #A9746E; /* caramelo claro */
+    background-color: #A9746E;
     padding: 10px;
     border-radius: 8px;
   }
@@ -31,36 +41,36 @@
     font-weight: bold;
     text-align: center;
     padding: 5px 0;
-    color: #7C4A23; /* terracota */
+    color: #fff;
   }
   .dia {
     min-height: 70px;
-    background-color: #D9B08C; /* caramelo */
+    background-color: #D9B08C;
     border-radius: 5px;
     padding: 5px;
+    cursor: pointer;
     user-select: none;
     text-align: right;
     position: relative;
     font-weight: normal;
-    cursor: default; /* fica pointer só nos sábados em modo editor */
   }
   .feriado {
-    background-color: #E07B52; /* terracota mais forte */
+    background-color: #E07B52;
     color: white;
     font-weight: bold;
   }
   .feriado-santo {
-    background-color: #C37C3E; /* terracota santo */
+    background-color: #C37C3E;
     color: white;
     font-weight: bold;
   }
   .disponivel {
-    background-color: #4B7A44 !important; /* verde disponível */
+    background-color: #4B7A44 !important;
     color: white;
     font-weight: bold;
   }
   .indisponivel {
-    background-color: #B54141 !important; /* vermelho indisponível */
+    background-color: #B54141 !important;
     color: white;
     font-weight: bold;
   }
@@ -156,7 +166,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
 <script>
-  // Config Firebase (pública do front-end)
   const firebaseConfig = {
     apiKey: "AIzaSyCNhoW4B6EkIe4jCp8grJiXGNRer6Q9tNs",
     authDomain: "calendariodecasamentos2026.firebaseapp.com",
@@ -167,7 +176,6 @@
     appId: "1:610947771106:web:b3213b288ccb647c9a4cbb"
   };
 
-  // Inicializa Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
@@ -180,9 +188,12 @@
   const mensagemEl = document.getElementById('mensagem');
   const senhaCorreta = "1904";
   let modoEditor = false;
-  let estados = {}; // status dos sábados
+  let estados = {};
 
-  // Feriados 2026 (YYYY-MM-DD)
+  const mesesNomes = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const diasMes = [31,28,31,30,31,30,31,31,30,31,30,31];
+  const diasSemana = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+
   const feriados = {
     "2026-01-01": { nome: "Confraternização Universal", tipo: "feriado" },
     "2026-02-17": { nome: "Carnaval", tipo: "feriado" },
@@ -199,64 +210,56 @@
     "2026-12-25": { nome: "Natal", tipo: "feriado-santo" }
   };
 
-  const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-
-  // --- RENDERIZAÇÃO ---
   function criarCalendario() {
-    if (!calendarioEl) return;
     calendarioEl.innerHTML = "";
 
-    // Cabeçalhos
-    for (let d = 0; d < 7; d++) {
-      const div = document.createElement('div');
-      div.classList.add('dia-semana');
-      div.textContent = diasSemana[d];
-      calendarioEl.appendChild(div);
-    }
+    for (let mes=0; mes<12; mes++) {
+      const mesContainer = document.createElement("div");
+      mesContainer.classList.add("mes");
 
-    // 2026 não é bissexto (mantém 28 em Fev)
-    const diasMes = [31,28,31,30,31,30,31,31,30,31,30,31];
+      const titulo = document.createElement("h2");
+      titulo.textContent = mesesNomes[mes];
+      mesContainer.appendChild(titulo);
 
-    // espaços antes do 1º dia do ano (para alinhar a grade)
-    const dataInicio = new Date(ano, 0, 1);
-    const diaSemanaInicio = dataInicio.getDay(); // 0=Dom, ... 6=Sáb
-    for (let i = 0; i < diaSemanaInicio; i++) {
-      const vazio = document.createElement('div');
-      vazio.classList.add('dia');
-      vazio.style.background = 'transparent';
-      calendarioEl.appendChild(vazio);
-    }
+      const grade = document.createElement("div");
+      grade.classList.add("grade");
 
-    // Dias do ano em grade contínua (sem quebra por mês)
-    for (let mes = 0; mes < 12; mes++) {
-      for (let dia = 1; dia <= diasMes[mes]; dia++) {
-        const dateStr = `${ano}-${String(mes + 1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
-        const div = document.createElement('div');
-        div.classList.add('dia');
+      // cabeçalho dias da semana
+      for (let d=0; d<7; d++) {
+        const div = document.createElement("div");
+        div.classList.add("dia-semana");
+        div.textContent = diasSemana[d];
+        grade.appendChild(div);
+      }
+
+      const primeiroDia = new Date(ano, mes, 1).getDay();
+      for (let i=0; i<primeiroDia; i++) {
+        const vazio = document.createElement("div");
+        vazio.classList.add("dia");
+        vazio.style.background = "transparent";
+        vazio.style.cursor = "default";
+        grade.appendChild(vazio);
+      }
+
+      for (let dia=1; dia<=diasMes[mes]; dia++) {
+        const dateStr = `${ano}-${String(mes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+        const div = document.createElement("div");
+        div.classList.add("dia");
         div.textContent = dia;
 
-        // Marca feriados
         if (feriados[dateStr]) {
-          if (feriados[dateStr].tipo === "feriado-santo") {
-            div.classList.add('feriado-santo');
-          } else {
-            div.classList.add('feriado');
-          }
+          div.classList.add(feriados[dateStr].tipo);
           div.title = feriados[dateStr].nome;
         }
 
-        // Sábados: estado clicável no modo editor
         const dataObj = new Date(ano, mes, dia);
         if (dataObj.getDay() === 6) {
-          if (estados[dateStr] === "disponivel") {
-            div.classList.add('disponivel');
-          } else if (estados[dateStr] === "indisponivel") {
-            div.classList.add('indisponivel');
-          }
+          if (estados[dateStr] === "disponivel") div.classList.add("disponivel");
+          if (estados[dateStr] === "indisponivel") div.classList.add("indisponivel");
 
           if (modoEditor) {
             div.style.cursor = "pointer";
-            div.addEventListener('click', () => {
+            div.addEventListener("click", () => {
               if (estados[dateStr] === "disponivel") {
                 estados[dateStr] = "indisponivel";
               } else if (estados[dateStr] === "indisponivel") {
@@ -266,46 +269,34 @@
               }
               criarCalendario();
             });
+          } else {
+            div.style.cursor = "default";
           }
-
-          // Tooltip combinando feriado + estado
-          const nomeFeriado = feriados[dateStr] ? feriados[dateStr].nome : "";
-          const estadoTxt = estados[dateStr] ? estados[dateStr].toUpperCase() : "Sem info";
-          div.title = (nomeFeriado ? nomeFeriado + " - " : "") + estadoTxt;
+          div.title = (feriados[dateStr]?.nome ? feriados[dateStr].nome+" - " : "") + (estados[dateStr] ? estados[dateStr].toUpperCase() : "Sem info");
         }
 
-        calendarioEl.appendChild(div);
+        grade.appendChild(div);
       }
+
+      mesContainer.appendChild(grade);
+      calendarioEl.appendChild(mesContainer);
     }
   }
 
-  // --- FIREBASE: carregar/salvar ---
   function carregarEstados() {
-    // Tenta carregar uma vez; se falhar, mantém render local
-    return db.ref('estados').once('value')
-      .then(snapshot => {
-        estados = snapshot.val() || {};
-        criarCalendario();
-      })
-      .catch(err => {
-        console.warn("Falha ao ler do Firebase (seguindo sem dados remotos):", err);
-        criarCalendario();
-      });
+    db.ref("estados").once("value").then(snapshot => {
+      estados = snapshot.val() || {};
+      criarCalendario();
+    });
   }
 
   function salvarEstados() {
     botaoSalvar.disabled = true;
     mensagemEl.textContent = "Salvando...";
-    db.ref('estados').set(estados)
-      .then(() => {
-        mensagemEl.textContent = "Salvo com sucesso!";
-      })
-      .catch(() => {
-        mensagemEl.textContent = "Erro ao salvar. Verifique as regras do Firebase.";
-      })
-      .finally(() => {
-        botaoSalvar.disabled = false;
-      });
+    db.ref("estados").set(estados)
+      .then(() => mensagemEl.textContent = "Salvo com sucesso!")
+      .catch(() => mensagemEl.textContent = "Erro ao salvar. Tente novamente.")
+      .finally(() => botaoSalvar.disabled = false);
   }
 
   function ativarModoEditor() {
@@ -316,46 +307,23 @@
     criarCalendario();
   }
 
-  function desativarModoEditor() {
-    modoEditor = false;
-    editorControles.style.display = "none";
-    senhaInput.disabled = false;
-    botaoEntrar.disabled = false;
-    senhaInput.value = "";
-    criarCalendario();
-  }
-
-  // --- Eventos UI ---
-  botaoEntrar.addEventListener('click', () => {
+  botaoEntrar.addEventListener("click", () => {
     if (senhaInput.value === senhaCorreta) {
       ativarModoEditor();
       mensagemEl.textContent = "";
     } else {
       mensagemEl.textContent = "Senha incorreta!";
-      setTimeout(() => { mensagemEl.textContent = ""; }, 3000);
+      setTimeout(() => mensagemEl.textContent = "", 3000);
     }
   });
 
-  botaoSalvar.addEventListener('click', salvarEstados);
+  botaoSalvar.addEventListener("click", salvarEstados);
 
-  // Atualizações em tempo real (se permitido)
-  db.ref('estados').on('value',
-    snapshot => {
-      const val = snapshot.val();
-      if (val) {
-        estados = val;
-        criarCalendario();
-      }
-    },
-    err => {
-      console.warn("Sem acesso em tempo real ao Firebase:", err);
-    }
-  );
+  db.ref("estados").on("value", snapshot => {
+    estados = snapshot.val() || {};
+    criarCalendario();
+  });
 
-  // --- Inicialização ---
-  // 1) Render local imediato (não bloqueia pela rede)
-  criarCalendario();
-  // 2) Tenta sincronizar com Firebase
   carregarEstados();
 </script>
 
