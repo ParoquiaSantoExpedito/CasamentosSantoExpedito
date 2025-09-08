@@ -11,6 +11,7 @@
       --terracota-escuro: #C14F3C;
       --caramelo-escuro: #D9A066;
       --facultativo: #FFF3DD;
+      --religioso: #E9C3A4;
       --fundo: #FFF8F0;
       --texto: #3C2F2F;
     }
@@ -96,6 +97,11 @@
       font-style: italic;
     }
 
+    .feriado-religioso {
+      background-color: var(--religioso);
+      font-weight: bold;
+    }
+
     .legenda {
       max-width: 800px;
       margin: 2rem auto 0 auto;
@@ -124,6 +130,7 @@
     <h3>Legenda:</h3>
     <div><span class="cor-box" style="background-color:#C14F3C;"></span>Feriado Nacional</div>
     <div><span class="cor-box" style="background-color:#D9A066;"></span>Feriado Municipal (Maringá)</div>
+    <div><span class="cor-box" style="background-color:#E9C3A4;"></span>Feriado Religioso</div>
     <div><span class="cor-box" style="background-color:#FFF3DD; border: 1px dashed #D9A066;"></span>Ponto Facultativo</div>
   </div>
 
@@ -138,29 +145,29 @@
     const ano = 2026;
     const containerAno = document.getElementById('calendario');
 
-    // Feriados e pontos facultativos
+    // Lista de feriados
     const feriados = {
-      // formato: 'MM-DD': 'tipo' ('nacional' | 'municipal' | 'facultativo')
-      '01-01': 'nacional',
-      '02-16': 'facultativo',
-      '02-17': 'facultativo',
-      '02-18': 'facultativo',
-      '04-03': 'nacional',
-      '04-21': 'nacional',
-      '05-01': 'nacional',
-      '05-10': 'municipal',
-      '06-04': 'facultativo',
-      '08-15': 'municipal',
-      '09-07': 'nacional',
-      '10-12': 'nacional',
-      '10-15': 'facultativo',
-      '10-28': 'facultativo',
-      '11-02': 'nacional',
-      '11-15': 'nacional',
-      '11-20': 'nacional',
-      '12-24': 'facultativo',
-      '12-25': 'nacional',
-      '12-31': 'facultativo'
+      // formato: 'MM-DD': ['tipo1', 'tipo2']
+      '01-01': ['nacional'],
+      '02-16': ['facultativo'],
+      '02-17': ['facultativo'],
+      '02-18': ['facultativo'],
+      '04-03': ['nacional', 'religioso'], // Sexta-feira Santa
+      '04-21': ['nacional'],
+      '05-01': ['nacional'],
+      '05-10': ['municipal'],
+      '06-04': ['facultativo', 'religioso'], // Corpus Christi
+      '08-15': ['municipal', 'religioso'],   // Padroeira
+      '09-07': ['nacional'],
+      '10-12': ['nacional', 'religioso'],    // Nossa Senhora Aparecida
+      '10-15': ['facultativo'],
+      '10-28': ['facultativo'],
+      '11-02': ['nacional', 'religioso'],    // Finados
+      '11-15': ['nacional'],
+      '11-20': ['nacional'],
+      '12-24': ['facultativo'],
+      '12-25': ['nacional', 'religioso'],    // Natal
+      '12-31': ['facultativo']
     };
 
     function formatKey(month, day) {
@@ -202,11 +209,12 @@
 
         const key = formatKey(mesIndex, dia);
         if (feriados[key]) {
-          diaDiv.classList.add(
-            feriados[key] === 'nacional' ? 'feriado-nacional' :
-            feriados[key] === 'municipal' ? 'feriado-municipal' :
-            'facultativo'
-          );
+          feriados[key].forEach(tipo => {
+            if (tipo === 'nacional') diaDiv.classList.add('feriado-nacional');
+            if (tipo === 'municipal') diaDiv.classList.add('feriado-municipal');
+            if (tipo === 'facultativo') diaDiv.classList.add('facultativo');
+            if (tipo === 'religioso') diaDiv.classList.add('feriado-religioso');
+          });
         }
 
         diaDiv.textContent = dia;
