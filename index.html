@@ -382,113 +382,223 @@
           if(estadosDisponibilidade[dataStr] === 'disponivel') {
             diaDiv.classList.add('disponivel');
           } else if(estadosDisponibilidade[dataStr] === 'indisponivel') {
-            diaDiv.classList.add('indisponivel');
-          }
+<script>
+  const meses = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  ];
 
-          diasGrid.appendChild(diaDiv);
+  const diasSemana = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+
+  const ano = 2026;
+
+  const feriados = {
+    "01-01": ["nacional"],
+    "02-10": ["municipal"],
+    "02-25": ["facultativo"],
+    "04-21": ["nacional"],
+    "05-01": ["nacional"],
+    "06-24": ["religioso"],
+    "09-07": ["nacional"],
+    "10-12": ["religioso"],
+    "11-02": ["religioso"],
+    "11-15": ["nacional"],
+    "12-25": ["nacional"]
+  };
+
+  const calendarioDiv = document.getElementById('calendario');
+
+  // Firebase config - substitua com as suas configs do Firebase
+  const firebaseConfig = {
+    apiKey: "COLE_AQUI_SEU_APIKEY",
+    authDomain: "COLE_AQUI_SEU_AUTHDOMAIN",
+    databaseURL: "COLE_AQUI_SEU_DATABASEURL",
+    projectId: "COLE_AQUI_SEU_PROJECTID",
+    storageBucket: "COLE_AQUI_SEU_STORAGEBUCKET",
+    messagingSenderId: "COLE_AQUI_SEU_MESSAGINGSENDERID",
+    appId: "COLE_AQUI_SEU_APPID"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+
+  let modoEditor = false;
+  let estadosDisponibilidade = {};
+
+  function criarCalendario(estadosDisponibilidade = {}) {
+    calendarioDiv.innerHTML = '';
+
+    for(let m = 0; m < 12; m++) {
+      const mesDiv = document.createElement('div');
+      mesDiv.className = 'mes';
+
+      const tituloMes = document.createElement('h2');
+      tituloMes.textContent = meses[m];
+      mesDiv.appendChild(tituloMes);
+
+      const cabecalhoDias = document.createElement('div');
+      cabecalhoDias.className = 'dias-semana';
+      diasSemana.forEach(d => {
+        const diaLetra = document.createElement('div');
+        diaLetra.textContent = d;
+        cabecalhoDias.appendChild(diaLetra);
+      });
+      mesDiv.appendChild(cabecalhoDias);
+
+      const diasGrid = document.createElement('div');
+      diasGrid.className = 'dias';
+
+      const primeiroDia = new Date(ano, m, 1).getDay();
+      const qtdDias = new Date(ano, m + 1, 0).getDate();
+
+      for(let i = 0; i < primeiroDia; i++) {
+        const vazio = document.createElement('div');
+        vazio.className = 'dia vazio';
+        vazio.textContent = '';
+        diasGrid.appendChild(vazio);
+      }
+
+      for(let d = 1; d <= qtdDias; d++) {
+        const diaDiv = document.createElement('div');
+        diaDiv.className = 'dia';
+        diaDiv.textContent = d;
+
+        const mm = (m + 1).toString().padStart(2, '0');
+        const dd = d.toString().padStart(2, '0');
+        const dataStr = `${mm}-${dd}`;
+
+        const dataObj = new Date(ano, m, d);
+        const diaSemana = dataObj.getDay();
+
+        if(feriados[dataStr]) {
+          const tipos = feriados[dataStr];
+          if(tipos.includes('nacional')) diaDiv.classList.add('feriado-nacional');
+          if(tipos.includes('municipal')) diaDiv.classList.add('feriado-municipal');
+          if(tipos.includes('facultativo')) diaDiv.classList.add('facultativo');
+          if(tipos.includes('religioso')) diaDiv.classList.add('feriado-religioso');
         }
 
-        mesDiv.appendChild(diasGrid);
-        calendarioDiv.appendChild(mesDiv);
-      }
-    }
-
-    // Estado inicial vazio
-    let estadosDisponibilidade = {};
-
-    // Atualiza modo editor para ativar/desativar clique e cursor
-    function atualizarModo() {
-      if(modoEditor) {
-        calendarioDiv.classList.remove('no-edit');
-        document.querySelectorAll('.dia').forEach(diaDiv => {
-          if(diaDiv.dataset.clicavel === 'true') {
-            diaDiv.style.cursor = 'pointer';
-          } else {
-            diaDiv.style.cursor = 'default';
-          }
-        });
-      } else {
-        calendarioDiv.classList.add('no-edit');
-        document.querySelectorAll('.dia').forEach(diaDiv => {
+        if(diaSemana === 6 &&
+          !diaDiv.classList.contains('feriado-nacional') &&
+          !diaDiv.classList.contains('feriado-municipal') &&
+          !diaDiv.classList.contains('facultativo') &&
+          !diaDiv.classList.contains('feriado-religioso')) {
+          diaDiv.dataset.clicavel = 'true';
+          diaDiv.style.cursor = modoEditor ? 'pointer' : 'default';
+        } else {
+          diaDiv.dataset.clicavel = 'false';
           diaDiv.style.cursor = 'default';
-        });
-      }
-    }
+        }
 
-    // Escuta mudanças no banco de dados Firebase e atualiza o calendário em tempo real
-    function escutarMudancas() {
-      database.ref('disponibilidade2026').on('value', (snapshot) => {
-        const dados = snapshot.val() || {};
-        estadosDisponibilidade = dados;
-        criarCalendario(estadosDisponibilidade);
-        atualizarModo();
+        if(estadosDisponibilidade[dataStr] === 'disponivel') {
+          diaDiv.classList.add('disponivel');
+        } else if(estadosDisponibilidade[dataStr] === 'indisponivel') {
+          diaDiv.classList.add('indisponivel');
+        }
+
+        diasGrid.appendChild(diaDiv);
+      }
+
+      mesDiv.appendChild(diasGrid);
+      calendarioDiv.appendChild(mesDiv);
+    }
+  }
+
+  function atualizarModo() {
+    if(modoEditor) {
+      calendarioDiv.classList.remove('no-edit');
+      document.querySelectorAll('.dia').forEach(diaDiv => {
+        if(diaDiv.dataset.clicavel === 'true') {
+          diaDiv.style.cursor = 'pointer';
+        } else {
+          diaDiv.style.cursor = 'default';
+        }
+      });
+    } else {
+      calendarioDiv.classList.add('no-edit');
+      document.querySelectorAll('.dia').forEach(diaDiv => {
+        diaDiv.style.cursor = 'default';
       });
     }
+  }
 
-    // Salvar estado no Firebase
-    function salvarEstadoFirebase(chave, estado) {
-      if(estado) {
-        database.ref('disponibilidade2026/' + chave).set(estado);
+  function escutarMudancas() {
+    database.ref('disponibilidade2026').on('value', (snapshot) => {
+      const dados = snapshot.val();
+      if(dados) {
+        estadosDisponibilidade = dados;
       } else {
-        database.ref('disponibilidade2026/' + chave).remove();
+        estadosDisponibilidade = {};
+      }
+      criarCalendario(estadosDisponibilidade);
+      atualizarModo();
+    });
+  }
+
+  function salvarEstadoFirebase(chave, estado) {
+    if(estado) {
+      database.ref('disponibilidade2026/' + chave).set(estado);
+    } else {
+      database.ref('disponibilidade2026/' + chave).remove();
+    }
+  }
+
+  calendarioDiv.addEventListener('click', e => {
+    if(!modoEditor) return;
+
+    const el = e.target;
+    if(el.classList.contains('dia') && el.dataset.clicavel === 'true') {
+      const mesEl = el.closest('.mes').querySelector('h2').textContent;
+      const diaNum = el.textContent;
+      const mesIdx = meses.indexOf(mesEl) + 1;
+      const mm = mesIdx.toString().padStart(2, '0');
+      const dd = diaNum.toString().padStart(2, '0');
+      const chave = `${mm}-${dd}`;
+
+      if(el.classList.contains('disponivel')) {
+        el.classList.remove('disponivel');
+        el.classList.add('indisponivel');
+        salvarEstadoFirebase(chave, 'indisponivel');
+      } else if(el.classList.contains('indisponivel')) {
+        el.classList.remove('indisponivel');
+        salvarEstadoFirebase(chave, null);
+      } else {
+        el.classList.add('disponivel');
+        salvarEstadoFirebase(chave, 'disponivel');
       }
     }
+  });
 
-    // Gerenciar clique no calendário
-    calendarioDiv.addEventListener('click', e => {
-      if(!modoEditor) return;
+  const senhaCorreta = '1904';
+  const senhaInput = document.getElementById('senhaInput');
+  const entrarBtn = document.getElementById('entrarBtn');
+  const msgDiv = document.getElementById('msg');
 
-      const el = e.target;
-      if(el.classList.contains('dia') && el.dataset.clicavel === 'true') {
-        const mesEl = el.closest('.mes').querySelector('h2').textContent;
-        const diaNum = el.textContent;
-        const mesIdx = meses.indexOf(mesEl) + 1;
-        const mm = mesIdx.toString().padStart(2, '0');
-        const dd = diaNum.toString().padStart(2, '0');
-        const chave = `${mm}-${dd}`;
+  entrarBtn.addEventListener('click', () => {
+    const senha = senhaInput.value.trim();
+    if(senha === senhaCorreta) {
+      modoEditor = true;
+      atualizarModo();
+      msgDiv.style.color = '#6ABD88';
+      msgDiv.textContent = 'Modo editor ativado! Clique nos sábados para marcar disponibilidade.';
+      senhaInput.value = '';
+      senhaInput.disabled = true;
+      entrarBtn.disabled = true;
+    } else {
+      msgDiv.style.color = '#D94A4A';
+      msgDiv.textContent = 'Senha incorreta. Tente novamente.';
+      senhaInput.value = '';
+      senhaInput.focus();
+    }
+  });
 
-        // Alterna estado: nada -> disponível -> indisponível -> nada
-        if(el.classList.contains('disponivel')) {
-          el.classList.remove('disponivel');
-          el.classList.add('indisponivel');
-          salvarEstadoFirebase(chave, 'indisponivel');
-        } else if(el.classList.contains('indisponivel')) {
-          el.classList.remove('indisponivel');
-          salvarEstadoFirebase(chave, null);
-        } else {
-          el.classList.add('disponivel');
-          salvarEstadoFirebase(chave, 'disponivel');
-        }
-      }
-    });
+  // Cria o calendário logo no começo (antes do Firebase)
+  criarCalendario();
+  atualizarModo();
 
-    // Login para modo editor
-    const senhaCorreta = '1904';
-    const senhaInput = document.getElementById('senhaInput');
-    const entrarBtn = document.getElementById('entrarBtn');
-    const msgDiv = document.getElementById('msg');
+  // Começa a escutar mudanças depois
+  escutarMudancas();
+</script>
 
-    entrarBtn.addEventListener('click', () => {
-      const senha = senhaInput.value.trim();
-      if(senha === senhaCorreta) {
-        modoEditor = true;
-        atualizarModo();
-        msgDiv.style.color = '#6ABD88';
-        msgDiv.textContent = 'Modo editor ativado! Clique nos sábados para marcar disponibilidade.';
-        senhaInput.value = '';
-        senhaInput.disabled = true;
-        entrarBtn.disabled = true;
-      } else {
-        msgDiv.style.color = '#D94A4A';
-        msgDiv.textContent = 'Senha incorreta. Tente novamente.';
-        senhaInput.value = '';
-        senhaInput.focus();
-      }
-    });
-
-    // Iniciar escuta dos dados do Firebase e criar calendário
-    escutarMudancas();
-
-  </script>
 </body>
 </html>
