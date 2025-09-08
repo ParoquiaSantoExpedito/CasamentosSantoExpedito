@@ -3,62 +3,376 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calendário 2026 - Maringá - Disponibilidade Casamento (Firebase)</title>
+  <title>Calendário 2026 - Maringá</title>
   <style>
-    :root {
-      --terracota: #E2725B;
-      --caramelo: #FFD59A;
-      --terracota-escuro: #C14F3C;
-      --caramelo-escuro: #D9A066;
-      --facultativo: #FFF3DD;
-      --religioso: #E9C3A4;
-      --fundo: #F4E1C1; /* fundo caramelo mais marrom suave */
-      --texto: #3C2F2F;
-      --verde-disponivel: #6ABD88;
-      --vermelho-indisponivel: #D94A4A;
-      --branco-neutro: white;
-    }
-
+    /* Paleta Terracota e Caramelo */
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--fundo);
-      margin: 0;
-      padding: 2rem;
-      color: var(--texto);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      user-select: none;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
+      font-family: Arial, sans-serif;
+      background-color: #a97142; /* fundo caramelo escuro */
+      color: #4b2e05;
+      margin: 20px;
     }
-
     h1 {
       text-align: center;
-      color: var(--terracota);
-      margin-bottom: 2rem;
-      user-select: text;
+      color: #7b4a28;
+      margin-bottom: 5px;
     }
-
-    .ano {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-      flex-grow: 1;
+    #calendario {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
     }
-
     .mes {
-      background-color: var(--caramelo);
-      border: 2px solid var(--caramelo-escuro);
+      background-color: #ddb892; /* terracota claro */
       border-radius: 8px;
-      padding: 1rem;
-      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      padding: 10px;
+      width: 280px;
+      box-shadow: 0 0 10px #7b4a28;
+    }
+    .mes h2 {
+      text-align: center;
+      margin: 5px 0 10px 0;
+      color: #7b4a28;
+    }
+    .dias-semana {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-weight: bold;
+      color: #7b4a28;
+      margin-bottom: 5px;
+    }
+    .dias {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+    .dia {
+      background-color: #f7e5d2; /* caramelo claro */
+      padding: 8px 0;
+      text-align: center;
+      border-radius: 5px;
       user-select: none;
+      cursor: default;
+      font-weight: normal;
+      color: #4b2e05;
+      border: 1px solid transparent;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    .dia.vazio {
+      background-color: transparent;
+      border: none;
+      cursor: default;
+    }
+    .feriado-nacional {
+      background-color: #c66c44; /* terracota mais forte */
+      color: #fff;
+      font-weight: bold;
+    }
+    .feriado-municipal {
+      background-color: #d3946f;
+      color: #fff;
+      font-weight: bold;
+    }
+    .facultativo {
+      background-color: #deb887;
+      font-style: italic;
+    }
+    .feriado-religioso {
+      background-color: #a67c52;
+      color: #fff;
+      font-weight: bold;
+    }
+    .disponivel {
+      background-color: #6abd88 !important; /* verde terracota */
+      color: white !important;
+      font-weight: bold;
+      border: 2px solid #4b7a52;
+      cursor: pointer;
+    }
+    .indisponivel {
+      background-color: #d94a4a !important; /* vermelho caramelo */
+      color: white !important;
+      font-weight: bold;
+      border: 2px solid #7a4b4b;
+      cursor: pointer;
+    }
+    #controle {
+      max-width: 300px;
+      margin: 0 auto;
+      text-align: center;
+      color: #7b4a28;
+      font-weight: bold;
+    }
+    #senhaInput {
+      padding: 6px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: 1px solid #7b4a28;
+      width: 150px;
+      margin-right: 10px;
+    }
+    #entrarBtn {
+      padding: 7px 15px;
+      font-size: 16px;
+      background-color: #7b4a28;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #entrarBtn:hover {
+      background-color: #a25e2a;
+    }
+    #msg {
+      margin-top: 10px;
+      min-height: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Calendário 2026 - Maringá</h1>
+  <div id="calendario"></div>
+
+  <div id="controle">
+    <input type="password" id="senhaInput" placeholder="Senha para editar" />
+    <button id="entrarBtn">Entrar</button>
+    <div id="msg"></div>
+  </div>
+
+  <!-- Firebase JS SDK (versão compatível) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <script>
+    const meses = [
+      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+
+    const diasSemana = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+
+    const ano = 2026;
+
+    const feriados = {
+      "01-01": ["nacional"],
+      "02-10": ["municipal"],
+      "02-25": ["facultativo"],
+      "04-21": ["nacional"],
+      "05-01": ["nacional"],
+      "06-24": ["religioso"],
+      "09-07": ["nacional"],
+      "10-12": ["religioso"],
+      "11-02": ["religioso"],
+      "11-15": ["nacional"],
+      "12-25": ["nacional"]
+    };
+
+    const calendarioDiv = document.getElementById('calendario');
+
+    // COLE AQUI SUA CONFIGURAÇÃO DO FIREBASE (SE QUISER TESTAR SALVAMENTO)
+    const firebaseConfig = {
+      apiKey: "COLE_AQUI_SEU_APIKEY",
+      authDomain: "COLE_AQUI_SEU_AUTHDOMAIN",
+      databaseURL: "COLE_AQUI_SEU_DATABASEURL",
+      projectId: "COLE_AQUI_SEU_PROJECTID",
+      storageBucket: "COLE_AQUI_SEU_STORAGEBUCKET",
+      messagingSenderId: "COLE_AQUI_SEU_MESSAGINGSENDERID",
+      appId: "COLE_AQUI_SEU_APPID"
+    };
+
+    // Inicializa Firebase só se configs estiverem preenchidas (evita erros locais)
+    if(firebaseConfig.apiKey !== "COLE_AQUI_SEU_APIKEY") {
+      firebase.initializeApp(firebaseConfig);
+      var database = firebase.database();
+    } else {
+      // Sem Firebase configurado, vai criar calendário estático
+      var database = null;
     }
 
+    let modoEditor = false;
+    let estadosDisponibilidade = {};
+
+    function criarCalendario(estados = {}) {
+      calendarioDiv.innerHTML = '';
+
+      for(let m = 0; m < 12; m++) {
+        const mesDiv = document.createElement('div');
+        mesDiv.className = 'mes';
+
+        const tituloMes = document.createElement('h2');
+        tituloMes.textContent = meses[m];
+        mesDiv.appendChild(tituloMes);
+
+        const cabecalhoDias = document.createElement('div');
+        cabecalhoDias.className = 'dias-semana';
+        diasSemana.forEach(d => {
+          const diaLetra = document.createElement('div');
+          diaLetra.textContent = d;
+          cabecalhoDias.appendChild(diaLetra);
+        });
+        mesDiv.appendChild(cabecalhoDias);
+
+        const diasGrid = document.createElement('div');
+        diasGrid.className = 'dias';
+
+        const primeiroDia = new Date(ano, m, 1).getDay();
+        const qtdDias = new Date(ano, m + 1, 0).getDate();
+
+        // espaços vazios para alinhar primeiro dia
+        for(let i = 0; i < primeiroDia; i++) {
+          const vazio = document.createElement('div');
+          vazio.className = 'dia vazio';
+          vazio.textContent = '';
+          diasGrid.appendChild(vazio);
+        }
+
+        for(let d = 1; d <= qtdDias; d++) {
+          const diaDiv = document.createElement('div');
+          diaDiv.className = 'dia';
+          diaDiv.textContent = d;
+
+          const mm = (m + 1).toString().padStart(2, '0');
+          const dd = d.toString().padStart(2, '0');
+          const dataStr = `${mm}-${dd}`;
+
+          const dataObj = new Date(ano, m, d);
+          const diaSemana = dataObj.getDay();
+
+          if(feriados[dataStr]) {
+            const tipos = feriados[dataStr];
+            if(tipos.includes('nacional')) diaDiv.classList.add('feriado-nacional');
+            if(tipos.includes('municipal')) diaDiv.classList.add('feriado-municipal');
+            if(tipos.includes('facultativo')) diaDiv.classList.add('facultativo');
+            if(tipos.includes('religioso')) diaDiv.classList.add('feriado-religioso');
+          }
+
+          // Sábado que não seja feriado, facultativo ou religioso é clicável
+          if(diaSemana === 6 &&
+            !diaDiv.classList.contains('feriado-nacional') &&
+            !diaDiv.classList.contains('feriado-municipal') &&
+            !diaDiv.classList.contains('facultativo') &&
+            !diaDiv.classList.contains('feriado-religioso')) {
+            diaDiv.dataset.clicavel = 'true';
+            diaDiv.style.cursor = modoEditor ? 'pointer' : 'default';
+          } else {
+            diaDiv.dataset.clicavel = 'false';
+            diaDiv.style.cursor = 'default';
+          }
+
+          if(estados[dataStr] === 'disponivel') {
+            diaDiv.classList.add('disponivel');
+          } else if(estados[dataStr] === 'indisponivel') {
+            diaDiv.classList.add('indisponivel');
+          }
+
+          diasGrid.appendChild(diaDiv);
+        }
+
+        mesDiv.appendChild(diasGrid);
+        calendarioDiv.appendChild(mesDiv);
+      }
+    }
+
+    function atualizarModo() {
+      if(modoEditor) {
+        calendarioDiv.classList.remove('no-edit');
+        document.querySelectorAll('.dia').forEach(diaDiv => {
+          if(diaDiv.dataset.clicavel === 'true') {
+            diaDiv.style.cursor = 'pointer';
+          } else {
+            diaDiv.style.cursor = 'default';
+          }
+        });
+      } else {
+        calendarioDiv.classList.add('no-edit');
+        document.querySelectorAll('.dia').forEach(diaDiv => {
+          diaDiv.style.cursor = 'default';
+        });
+      }
+    }
+
+    // Se estiver com Firebase configurado, escuta mudanças
+    function escutarMudancas() {
+      if(!database) return; // sem Firebase configurado, sai
+      database.ref('disponibilidade2026').on('value', (snapshot) => {
+        const dados = snapshot.val();
+        estadosDisponibilidade = dados || {};
+        criarCalendario(estadosDisponibilidade);
+        atualizarModo();
+      });
+    }
+
+    function salvarEstadoFirebase(chave, estado) {
+      if(!database) return; // sem Firebase configurado, sai
+      if(estado) {
+        database.ref('disponibilidade2026/' + chave).set(estado);
+      } else {
+        database.ref('disponibilidade2026/' + chave).remove();
+      }
+    }
+
+    calendarioDiv.addEventListener('click', e => {
+      if(!modoEditor) return;
+
+      const el = e.target;
+      if(el.classList.contains('dia') && el.dataset.clicavel === 'true') {
+        const mesEl = el.closest('.mes').querySelector('h2').textContent;
+        const diaNum = el.textContent;
+        const mesIdx = meses.indexOf(mesEl) + 1;
+        const mm = mesIdx.toString().padStart(2, '0');
+        const dd = diaNum.toString().padStart(2, '0');
+        const chave = `${mm}-${dd}`;
+
+        if(el.classList.contains('disponivel')) {
+          el.classList.remove('disponivel');
+          el.classList.add('indisponivel');
+          salvarEstadoFirebase(chave, 'indisponivel');
+        } else if(el.classList.contains('indisponivel')) {
+          el.classList.remove('indisponivel');
+          salvarEstadoFirebase(chave, null);
+        } else {
+          el.classList.add('disponivel');
+          salvarEstadoFirebase(chave, 'disponivel');
+        }
+      }
+    });
+
+    const senhaCorreta = '1904';
+    const senhaInput = document.getElementById('senhaInput');
+    const entrarBtn = document.getElementById('entrarBtn');
+    const msgDiv = document.getElementById('msg');
+
+    entrarBtn.addEventListener('click', () => {
+      const senha = senhaInput.value.trim();
+      if(senha === senhaCorreta) {
+        modoEditor = true;
+        atualizarModo();
+        msgDiv.style.color = '#6ABD88';
+        msgDiv.textContent = 'Modo editor ativado! Clique nos sábados para marcar disponibilidade.';
+        senhaInput.value = '';
+        senhaInput.disabled = true;
+        entrarBtn.disabled = true;
+      } else {
+        msgDiv.style.color = '#D94A4A';
+        msgDiv.textContent = 'Senha incorreta. Tente novamente.';
+        senhaInput.value = '';
+        senhaInput.focus();
+      }
+    });
+
+    // Criar calendário inicialmente sem dados (para evitar tela vazia)
+    criarCalendario();
+    atualizarModo();
+
+    // Começar a escutar dados do Firebase, se disponível
+    escutarMudancas();
+
+  </script>
+</body>
+</html>
     .mes h2 {
       text-align: center;
       margin: 0 0 1rem 0;
