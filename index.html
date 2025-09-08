@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Calendário de casamentos de 2026</title>
   <style>
     :root {
@@ -12,22 +12,29 @@
       --caramelo-escuro: #D9A066;
       --facultativo: #FFF3DD;
       --religioso: #E9C3A4;
-  --fundo: #F4E1C1;
+      --fundo: #F4E1C1; /* fundo caramelo mais marrom suave */
       --texto: #3C2F2F;
+      --verde-disponivel: #6ABD88;
+      --vermelho-indisponivel: #D94A4A;
+      --branco-neutro: white;
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--fundo);
       margin: 0;
       padding: 2rem;
       color: var(--texto);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
     }
 
     h1 {
       text-align: center;
       color: var(--terracota);
       margin-bottom: 2rem;
+      user-select: text;
     }
 
     .ano {
@@ -44,6 +51,7 @@
       border-radius: 8px;
       padding: 1rem;
       box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      user-select: none;
     }
 
     .mes h2 {
@@ -51,6 +59,7 @@
       margin: 0 0 1rem 0;
       color: var(--terracota);
       font-size: 1.2rem;
+      user-select: text;
     }
 
     .dias-semana {
@@ -60,6 +69,7 @@
       text-align: center;
       margin-bottom: 0.5rem;
       font-size: 0.9rem;
+      user-select: text;
     }
 
     .dias {
@@ -72,53 +82,102 @@
     .dia {
       padding: 0.5rem;
       border-radius: 4px;
-      background-color: white;
+      background-color: var(--branco-neutro);
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      user-select: text;
+      box-sizing: border-box;
+      border: 1px solid transparent;
+      position: relative;
+      font-weight: normal;
+      color: var(--texto);
     }
 
-    .vazio {
+    .dia.vazio {
       background-color: transparent;
+      cursor: default;
+      border: none;
+      user-select: none;
     }
 
+    /* Feriados */
     .feriado-nacional {
       background-color: var(--terracota-escuro);
       color: white;
       font-weight: bold;
+      cursor: default;
     }
 
     .feriado-municipal {
       background-color: var(--caramelo-escuro);
       color: white;
       font-weight: bold;
+      cursor: default;
     }
 
     .facultativo {
       background-color: var(--facultativo);
       border: 1px dashed var(--caramelo-escuro);
       font-style: italic;
+      cursor: default;
+      color: var(--texto);
     }
 
     .feriado-religioso {
       background-color: var(--religioso);
       font-weight: bold;
+      cursor: default;
+      color: var(--texto);
     }
 
+    /* Estados de disponibilidade - sobrescrevem outras cores ao clicar */
+    .disponivel {
+      background-color: var(--verde-disponivel) !important;
+      color: white !important;
+      font-weight: bold !important;
+      cursor: pointer;
+      border: 2px solid #3B7A53 !important;
+    }
+
+    .indisponivel {
+      background-color: var(--vermelho-indisponivel) !important;
+      color: white !important;
+      font-weight: bold !important;
+      cursor: pointer;
+      border: 2px solid #7A3B3B !important;
+    }
+
+    /* Legenda */
     .legenda {
       max-width: 800px;
       margin: 2rem auto 0 auto;
       font-size: 0.9rem;
+      user-select: text;
     }
 
     .legenda div {
       margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
     }
 
     .cor-box {
       display: inline-block;
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       margin-right: 0.5rem;
       vertical-align: middle;
-      border-radius: 3px;
+      border-radius: 4px;
+      border: 1px solid #b59b7e;
+      box-sizing: border-box;
+    }
+
+    /* Cursor e seleção para feriados não clicáveis */
+    .dia.feriado-nacional,
+    .dia.feriado-municipal,
+    .dia.facultativo,
+    .dia.feriado-religioso {
+      cursor: default;
     }
   </style>
 </head>
@@ -132,102 +191,163 @@
     <div><span class="cor-box" style="background-color:#D9A066;"></span>Feriado Municipal (Maringá)</div>
     <div><span class="cor-box" style="background-color:#E9C3A4;"></span>Feriado Religioso</div>
     <div><span class="cor-box" style="background-color:#FFF3DD; border: 1px dashed #D9A066;"></span>Ponto Facultativo</div>
+    <div><span class="cor-box" style="background-color:#6ABD88;"></span>Disponível para Casamento</div>
+    <div><span class="cor-box" style="background-color:#D94A4A;"></span>Indisponível para Casamento</div>
   </div>
 
-  <script>
-    const meses = [
-      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-    ];
+<script>
+  const meses = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  ];
 
-    const diasSemana = ["D", "S", "T", "Q", "Q", "S", "S"];
+  const diasSemana = ["D", "S", "T", "Q", "Q", "S", "S"];
 
-    const ano = 2026;
-    const containerAno = document.getElementById('calendario');
+  const ano = 2026;
+  const containerAno = document.getElementById('calendario');
 
-    // Lista de feriados
-    const feriados = {
-      // formato: 'MM-DD': ['tipo1', 'tipo2']
-      '01-01': ['nacional'],
-      '02-16': ['facultativo'],
-      '02-17': ['facultativo'],
-      '02-18': ['facultativo'],
-      '04-03': ['nacional', 'religioso'], // Sexta-feira Santa
-      '04-21': ['nacional'],
-      '05-01': ['nacional'],
-      '05-10': ['municipal'],
-      '06-04': ['facultativo', 'religioso'], // Corpus Christi
-      '08-15': ['municipal', 'religioso'],   // Padroeira
-      '09-07': ['nacional'],
-      '10-12': ['nacional', 'religioso'],    // Nossa Senhora Aparecida
-      '10-15': ['facultativo'],
-      '10-28': ['facultativo'],
-      '11-02': ['nacional', 'religioso'],    // Finados
-      '11-15': ['nacional'],
-      '11-20': ['nacional'],
-      '12-24': ['facultativo'],
-      '12-25': ['nacional', 'religioso'],    // Natal
-      '12-31': ['facultativo']
-    };
+  // Feriados no formato MM-DD com tipos
+  const feriados = {
+    '01-01': ['nacional'],
+    '02-16': ['facultativo'],
+    '02-17': ['facultativo'],
+    '02-18': ['facultativo'],
+    '04-03': ['nacional', 'religioso'], // Sexta-feira Santa
+    '04-21': ['nacional'],
+    '05-01': ['nacional'],
+    '05-10': ['municipal'],
+    '06-04': ['facultativo', 'religioso'], // Corpus Christi
+    '08-15': ['municipal', 'religioso'],   // Nossa Senhora da Glória
+    '09-07': ['nacional'],
+    '10-12': ['nacional', 'religioso'],    // Nossa Senhora Aparecida
+    '10-15': ['facultativo'],
+    '10-28': ['facultativo'],
+    '11-02': ['nacional', 'religioso'],    // Finados
+    '11-15': ['nacional'],
+    '11-20': ['nacional'],
+    '12-24': ['facultativo'],
+    '12-25': ['nacional', 'religioso'],    // Natal
+    '12-31': ['facultativo']
+  };
 
-    function formatKey(month, day) {
-      return `${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  // LocalStorage key para salvar disponibilidade
+  const storageKey = 'disponibilidadeCasamento2026';
+
+  // Carrega estado salvo do localStorage
+  let disponibilidadeSalva = JSON.parse(localStorage.getItem(storageKey)) || {};
+
+  // Formata chave para armazenamento e lookup: "MM-DD"
+  function formatKey(month, day) {
+    return `${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
+
+  // Função para alternar estado de disponibilidade no clique
+  // Ciclo: neutro -> disponível -> indisponível -> neutro
+  function alternarEstado(diaDiv, chave) {
+    // Se feriado, não permite editar
+    if (diaDiv.classList.contains('feriado-nacional') ||
+        diaDiv.classList.contains('feriado-municipal') ||
+        diaDiv.classList.contains('facultativo') ||
+        diaDiv.classList.contains('feriado-religioso')) {
+      return;
     }
 
-    function criarCalendarioMes(mesIndex) {
-      const mesDiv = document.createElement('div');
-      mesDiv.className = 'mes';
+    // Remove estados anteriores
+    diaDiv.classList.remove('disponivel', 'indisponivel');
 
-      const titulo = document.createElement('h2');
-      titulo.textContent = meses[mesIndex];
-      mesDiv.appendChild(titulo);
+    let estadoAtual = disponibilidadeSalva[chave] || 'neutro';
 
-      const diasSemanaDiv = document.createElement('div');
-      diasSemanaDiv.className = 'dias-semana';
-      diasSemana.forEach(dia => {
-        const span = document.createElement('span');
-        span.textContent = dia;
-        diasSemanaDiv.appendChild(span);
-      });
-      mesDiv.appendChild(diasSemanaDiv);
+    if (estadoAtual === 'neutro') {
+      diaDiv.classList.add('disponivel');
+      disponibilidadeSalva[chave] = 'disponivel';
+    } else if (estadoAtual === 'disponivel') {
+      diaDiv.classList.add('indisponivel');
+      disponibilidadeSalva[chave] = 'indisponivel';
+    } else {
+      // volta para neutro
+      delete disponibilidadeSalva[chave];
+    }
 
-      const diasDiv = document.createElement('div');
-      diasDiv.className = 'dias';
+    // Salva no localStorage
+    localStorage.setItem(storageKey, JSON.stringify(disponibilidadeSalva));
+  }
 
-      const primeiroDia = new Date(ano, mesIndex, 1).getDay();
-      const diasNoMes = new Date(ano, mesIndex + 1, 0).getDate();
+  function criarCalendarioMes(mesIndex) {
+    const mesDiv = document.createElement('div');
+    mesDiv.className = 'mes';
 
-      for (let i = 0; i < primeiroDia; i++) {
-        const vazio = document.createElement('div');
-        vazio.className = 'dia vazio';
-        diasDiv.appendChild(vazio);
+    const titulo = document.createElement('h2');
+    titulo.textContent = meses[mesIndex];
+    mesDiv.appendChild(titulo);
+
+    const diasSemanaDiv = document.createElement('div');
+    diasSemanaDiv.className = 'dias-semana';
+    diasSemana.forEach(dia => {
+      const span = document.createElement('span');
+      span.textContent = dia;
+      diasSemanaDiv.appendChild(span);
+    });
+    mesDiv.appendChild(diasSemanaDiv);
+
+    const diasDiv = document.createElement('div');
+    diasDiv.className = 'dias';
+
+    const primeiroDia = new Date(ano, mesIndex, 1).getDay();
+    const diasNoMes = new Date(ano, mesIndex + 1, 0).getDate();
+
+    // Preenche espaços vazios antes do primeiro dia
+    for (let i = 0; i < primeiroDia; i++) {
+      const vazio = document.createElement('div');
+      vazio.className = 'dia vazio';
+      diasDiv.appendChild(vazio);
+    }
+
+    for (let dia = 1; dia <= diasNoMes; dia++) {
+      const diaDiv = document.createElement('div');
+      diaDiv.className = 'dia';
+      const key = formatKey(mesIndex, dia);
+
+      // Marca feriados com classes e estilos
+      if (feriados[key]) {
+        feriados[key].forEach(tipo => {
+          if (tipo === 'nacional') diaDiv.classList.add('feriado-nacional');
+          if (tipo === 'municipal') diaDiv.classList.add('feriado-municipal');
+          if (tipo === 'facultativo') diaDiv.classList.add('facultativo');
+          if (tipo === 'religioso') diaDiv.classList.add('feriado-religioso');
+        });
       }
 
-      for (let dia = 1; dia <= diasNoMes; dia++) {
-        const diaDiv = document.createElement('div');
-        diaDiv.className = 'dia';
-
-        const key = formatKey(mesIndex, dia);
-        if (feriados[key]) {
-          feriados[key].forEach(tipo => {
-            if (tipo === 'nacional') diaDiv.classList.add('feriado-nacional');
-            if (tipo === 'municipal') diaDiv.classList.add('feriado-municipal');
-            if (tipo === 'facultativo') diaDiv.classList.add('facultativo');
-            if (tipo === 'religioso') diaDiv.classList.add('feriado-religioso');
-          });
+      // Aplica estado salvo de disponibilidade
+      if (disponibilidadeSalva[key]) {
+        if (disponibilidadeSalva[key] === 'disponivel') {
+          diaDiv.classList.add('disponivel');
+        } else if (disponibilidadeSalva[key] === 'indisponivel') {
+          diaDiv.classList.add('indisponivel');
         }
-
-        diaDiv.textContent = dia;
-        diasDiv.appendChild(diaDiv);
       }
 
-      mesDiv.appendChild(diasDiv);
-      containerAno.appendChild(mesDiv);
+      diaDiv.textContent = dia;
+
+      // Só permite clicar nos dias que NÃO são feriados para marcar disponibilidade
+      if (!diaDiv.classList.contains('feriado-nacional') &&
+          !diaDiv.classList.contains('feriado-municipal') &&
+          !diaDiv.classList.contains('facultativo') &&
+          !diaDiv.classList.contains('feriado-religioso')) {
+        diaDiv.addEventListener('click', () => {
+          alternarEstado(diaDiv, key);
+        });
+      }
+
+      diasDiv.appendChild(diaDiv);
     }
 
-    for (let i = 0; i < 12; i++) {
-      criarCalendarioMes(i);
-    }
-  </script>
+    mesDiv.appendChild(diasDiv);
+    containerAno.appendChild(mesDiv);
+  }
+
+  for (let i = 0; i < 12; i++) {
+    criarCalendarioMes(i);
+  }
+</script>
 </body>
 </html>
