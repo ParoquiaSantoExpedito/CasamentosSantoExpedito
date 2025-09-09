@@ -288,6 +288,12 @@
 
   criarCalendario();
 </script>
-
+<script src="https://unpkg.com/@supabase/supabase-js"></script>
+<script>
+  const SUPABASE_URL = "https://SEU-PROJETO.supabase.co";
+  const SUPABASE_KEY = "CHAVE_ANON";
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+  
 </body>
 </html>
