@@ -4,13 +4,173 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Calendário de Casamentos de 2026</title>
+
+<!-- Fonte moderna -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style>
+:root {
+  --fundo: #fdfaf6;
+  --caramelo: #D9B08C;
+  --terracota: #C97C5D;
+  --marrom: #8B5E3C;
+  --verde: #4B7A44;
+  --vermelho: #B54141;
+  --roxo: #6A5ACD;   /* feriado municipal */
+  --laranja: #FFA500; /* ponto facultativo */
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--fundo);
+  margin: 0;
+  padding: 20px;
+  color: #3E2C23;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 25px;
+  color: var(--marrom);
+  font-weight: 600;
+}
+
+#calendario {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.mes {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.mes h2 {
+  text-align: center;
+  margin: 0;
+  padding: 14px;
+  font-size: 1.3rem;
+  background: var(--marrom);
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding: 15px;
+}
+
+.dia-semana {
+  font-weight: 600;
+  text-align: center;
+  padding: 6px 0;
+  color: var(--terracota);
+  font-size: 0.9rem;
+}
+
+.dia {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  background: var(--caramelo);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: default;
+  transition: all 0.2s ease;
+  position: relative;
+  color: #3E2C23;
+}
+
+.dia:hover {
+  transform: scale(1.05);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+/* Feriados */
+.feriado {
+  background: var(--terracota);
+  color: #fff;
+  font-weight: 600;
+}
+.feriado-santo {
+  background: #A0522D;
+  color: #fff;
+  font-weight: 600;
+}
+.feriado-municipal {
+  background: var(--roxo);
+  color: #fff;
+  font-weight: 600;
+}
+.facultativo {
+  background: var(--laranja);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Sábados */
+.disponivel {
+  background: var(--verde) !important;
+  color: #fff;
+  font-weight: 600;
+}
+.indisponivel {
+  background: var(--vermelho) !important;
+  color: #fff;
+  font-weight: 600;
+}
+
+#legenda {
+  max-width: 800px;
+  margin: 40px auto 10px auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.legenda-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #3E2C23;
+}
+
+.legenda-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+}
+
+.leg-feriado { background: var(--terracota); }
+.leg-feriado-santo { background: #A0522D; }
+.leg-feriado-municipal { background: var(--roxo); }
+.leg-facultativo { background: var(--laranja); }
+.leg-disponivel { background: var(--verde); }
+.leg-indisponivel { background: var(--vermelho); }
 </style>
 </head>
 <body>
+
 <h1>Calendário de Casamentos de 2026</h1>
+
 <div id="calendario"></div>
+
 <div id="legenda">
   <div class="legenda-item"><div class="legenda-color leg-feriado"></div>Feriado Nacional</div>
   <div class="legenda-item"><div class="legenda-color leg-feriado-santo"></div>Feriado Santo</div>
@@ -21,133 +181,120 @@
 </div>
 
 <script>
-  const ano = 2026;
-  const senhaCorreta = "2011";
-  const calendarioEl = document.getElementById("calendario");
+const ano = 2026;
+const senhaCorreta = "2011";
+const calendarioEl = document.getElementById("calendario");
 
-  const mesesNomes = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-  const diasMes = [31,28,31,30,31,30,31,31,30,31,30,31];
-  const diasSemana = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+const mesesNomes = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const diasMes = [31,28,31,30,31,30,31,31,30,31,30,31]; // 2026 não é bissexto
+const diasSemana = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 
-  const feriados = {
-    "2026-01-01": { nome: "Confraternização Universal", tipo: "feriado" },
-    "2026-04-03": { nome: "Sexta-feira Santa", tipo: "feriado-santo" },
-    "2026-04-21": { nome: "Tiradentes", tipo: "feriado" },
-    "2026-05-01": { nome: "Dia do Trabalho", tipo: "feriado" },
-    "2026-09-07": { nome: "Independência do Brasil", tipo: "feriado" },
-    "2026-10-12": { nome: "Nossa Senhora Aparecida", tipo: "feriado-santo" },
-    "2026-11-02": { nome: "Finados", tipo: "feriado-santo" },
-    "2026-11-15": { nome: "Proclamação da República", tipo: "feriado" },
-    "2026-11-20": { nome: "Dia da Consciência Negra", tipo: "feriado" },
-    "2026-12-25": { nome: "Natal", tipo: "feriado-santo" },
-    "2026-05-10": { nome: "Aniversário de Maringá", tipo: "feriado-municipal" },
-    "2026-08-15": { nome: "Nossa Senhora da Glória (Padroeira de Maringá)", tipo: "feriado-municipal" },
-    "2026-02-16": { nome: "Carnaval (facultativo)", tipo: "facultativo" },
-    "2026-02-17": { nome: "Carnaval (facultativo)", tipo: "facultativo" },
-    "2026-02-18": { nome: "Quarta-feira de Cinzas até 14h (facultativo)", tipo: "facultativo" },
-    "2026-06-04": { nome: "Corpus Christi (facultativo)", tipo: "facultativo" },
-    "2026-10-15": { nome: "Dia do Professor (facultativo)", tipo: "facultativo" },
-    "2026-10-28": { nome: "Dia do Servidor Público (facultativo)", tipo: "facultativo" },
-    "2026-12-24": { nome: "Véspera de Natal após 14h (facultativo)", tipo: "facultativo" },
-    "2026-12-31": { nome: "Véspera de Ano Novo após 14h (facultativo)", tipo: "facultativo" }
-  };
+const feriados = {
+  "2026-01-01": { nome: "Confraternização Universal", tipo: "feriado" },
+  "2026-04-03": { nome: "Sexta-feira Santa", tipo: "feriado-santo" },
+  "2026-04-21": { nome: "Tiradentes", tipo: "feriado" },
+  "2026-05-01": { nome: "Dia do Trabalho", tipo: "feriado" },
+  "2026-09-07": { nome: "Independência do Brasil", tipo: "feriado" },
+  "2026-10-12": { nome: "Nossa Senhora Aparecida", tipo: "feriado-santo" },
+  "2026-11-02": { nome: "Finados", tipo: "feriado-santo" },
+  "2026-11-15": { nome: "Proclamação da República", tipo: "feriado" },
+  "2026-11-20": { nome: "Dia da Consciência Negra", tipo: "feriado" },
+  "2026-12-25": { nome: "Natal", tipo: "feriado-santo" },
+  "2026-05-10": { nome: "Aniversário de Maringá", tipo: "feriado-municipal" },
+  "2026-08-15": { nome: "Nossa Senhora da Glória (Padroeira de Maringá)", tipo: "feriado-municipal" },
+  "2026-02-16": { nome: "Carnaval (facultativo)", tipo: "facultativo" },
+  "2026-02-17": { nome: "Carnaval (facultativo)", tipo: "facultativo" },
+  "2026-02-18": { nome: "Quarta-feira de Cinzas até 14h (facultativo)", tipo: "facultativo" },
+  "2026-06-04": { nome: "Corpus Christi (facultativo)", tipo: "facultativo" },
+  "2026-10-15": { nome: "Dia do Professor (facultativo)", tipo: "facultativo" },
+  "2026-10-28": { nome: "Dia do Servidor Público (facultativo)", tipo: "facultativo" },
+  "2026-12-24": { nome: "Véspera de Natal após 14h (facultativo)", tipo: "facultativo" },
+  "2026-12-31": { nome: "Véspera de Ano Novo após 14h (facultativo)", tipo: "facultativo" }
+};
 
-  let estados = {};
+let estados = {};
 
-  async function carregarEstados() {
-    try {
-      const res = await fetch("/api/estados");
-      estados = await res.json();
-    } catch (e) {
-      estados = {};
+function criarCalendario() {
+  calendarioEl.innerHTML = "";
+
+  for (let mes = 0; mes < 12; mes++) {
+    const mesContainer = document.createElement("div");
+    mesContainer.classList.add("mes");
+
+    const titulo = document.createElement("h2");
+    titulo.textContent = mesesNomes[mes];
+    mesContainer.appendChild(titulo);
+
+    const grade = document.createElement("div");
+    grade.classList.add("grade");
+
+    // Cabeçalho dias da semana
+    for (let d = 0; d < 7; d++) {
+      const div = document.createElement("div");
+      div.classList.add("dia-semana");
+      div.textContent = diasSemana[d];
+      grade.appendChild(div);
     }
-    criarCalendario();
-  }
 
-  async function salvarEstado(dateStr, novoEstado) {
-    try {
-      const res = await fetch("/api/estado", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ dateStr, novoEstado })
-      });
-      const atualizado = await res.json();
-      estados = atualizado;
-      criarCalendario();
-    } catch (e) {
-      alert("Erro ao salvar. Tente novamente.");
+    // Espaços vazios antes do 1º dia
+    const primeiroDia = new Date(ano, mes, 1).getDay();
+    for (let i = 0; i < primeiroDia; i++) {
+      const vazio = document.createElement("div");
+      grade.appendChild(vazio);
     }
-  }
 
-  function criarCalendario() {
-    calendarioEl.innerHTML = "";
+    // Dias do mês
+    for (let dia = 1; dia <= diasMes[mes]; dia++) {
+      const dateStr = `${ano}-${String(mes+1).padStart(2,"0")}-${String(dia).padStart(2,"0")}`;
+      const div = document.createElement("div");
+      div.classList.add("dia");
+      div.textContent = dia;
 
-    for (let mes = 0; mes < 12; mes++) {
-      const mesContainer = document.createElement("div");
-      mesContainer.classList.add("mes");
-
-      const titulo = document.createElement("h2");
-      titulo.textContent = mesesNomes[mes];
-      mesContainer.appendChild(titulo);
-
-      const grade = document.createElement("div");
-      grade.classList.add("grade");
-
-      for (let d = 0; d < 7; d++) {
-        const div = document.createElement("div");
-        div.classList.add("dia-semana");
-        div.textContent = diasSemana[d];
-        grade.appendChild(div);
+      if (feriados[dateStr]) {
+        div.classList.add(feriados[dateStr].tipo);
+        div.title = feriados[dateStr].nome;
       }
 
-      const primeiroDia = new Date(ano, mes, 1).getDay();
-      for (let i = 0; i < primeiroDia; i++) {
-        const vazio = document.createElement("div");
-        grade.appendChild(vazio);
-      }
+      const dataObj = new Date(ano, mes, dia);
+      if (dataObj.getDay() === 6) {
+        if (estados[dateStr] === "disponivel") div.classList.add("disponivel");
+        if (estados[dateStr] === "indisponivel") div.classList.add("indisponivel");
 
-      for (let dia = 1; dia <= diasMes[mes]; dia++) {
-        const dateStr = `${ano}-${String(mes+1).padStart(2,"0")}-${String(dia).padStart(2,"0")}`;
-        const div = document.createElement("div");
-        div.classList.add("dia");
-        div.textContent = dia;
-
-        if (feriados[dateStr]) {
-          div.classList.add(feriados[dateStr].tipo);
-          div.title = feriados[dateStr].nome;
-        }
-
-        const dataObj = new Date(ano, mes, dia);
-        if (dataObj.getDay() === 6) {
-          if (estados[dateStr] === "disponivel") div.classList.add("disponivel");
-          if (estados[dateStr] === "indisponivel") div.classList.add("indisponivel");
-
-          div.style.cursor = "pointer";
-          div.addEventListener("click", async () => {
-            const senha = prompt("Digite a senha para alterar:");
-            if (senha === senhaCorreta) {
-              let novoEstado;
-              if (estados[dateStr] === "disponivel") {
-                novoEstado = "indisponivel";
-              } else if (estados[dateStr] === "indisponivel") {
-                novoEstado = null;
-              } else {
-                novoEstado = "disponivel";
-              }
-              await salvarEstado(dateStr, novoEstado);
-            } else if (senha !== null) {
-              alert("Senha incorreta!");
+        div.style.cursor = "pointer";
+        div.addEventListener("click", () => {
+          const senha = prompt("Digite a senha para alterar:");
+          if (senha === senhaCorreta) {
+            if (estados[dateStr] === "disponivel") {
+              estados[dateStr] = "indisponivel";
+            } else if (estados[dateStr] === "indisponivel") {
+              delete estados[dateStr];
+            } else {
+              estados[dateStr] = "disponivel";
             }
-          });
-        }
-        grade.appendChild(div);
+            criarCalendario();
+          } else if (senha !== null) {
+            alert("Senha incorreta!");
+          }
+        });
       }
-      mesContainer.appendChild(grade);
-      calendarioEl.appendChild(mesContainer);
-    }
-  }
 
-  carregarEstados();
+      grade.appendChild(div);
+    }
+
+    mesContainer.appendChild(grade);
+    calendarioEl.appendChild(mesContainer);
+  }
+}
+
+criarCalendario();
 </script>
+
+<script src="https://unpkg.com/@supabase/supabase-js"></script>
+<script>
+const SUPABASE_URL = "https://hrhtyrlomctjlqexwsgp.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyaHR5cmxvbWN0amxxZXh3c2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2MTI0MDEsImV4cCI6MjA3MzE4ODQwMX0.aFfdi0wleKGkQPXhBe9yYyk88ELFMoQLLg7gEPQb5JQ";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+
 </body>
 </html>
