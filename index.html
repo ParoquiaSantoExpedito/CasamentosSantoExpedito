@@ -294,22 +294,31 @@ atualizarCalendario();
           if (estados[dateStr] === "disponivel") div.classList.add("disponivel");
           if (estados[dateStr] === "indisponivel") div.classList.add("indisponivel");
 
-          div.style.cursor = "pointer";
-          div.addEventListener("click", () => {
-            const senha = prompt("Digite a senha para alterar:");
-            if (senha === senhaCorreta) {
-              let novoEstado;
-              if (estados[dateStr] === "disponivel") novoEstado = "indisponivel";
-              else if (estados[dateStr] === "indisponivel") novoEstado = null;
-              else novoEstado = "disponivel";
+         div.style.cursor = "pointer";
+div.addEventListener("click", () => {
+  const senha = prompt("Digite a senha para alterar:");
+  if (senha === senhaCorreta) {
+    // Remove as classes antigas
+    div.classList.remove("disponivel", "indisponivel");
 
-              database.ref('casamentos/' + dateStr).set(novoEstado);
-            } else if (senha !== null) {
-              alert("Senha incorreta!");
-            }
-          });
+    // Atualiza o estado e adiciona a classe correta
+    if (estados[dateStr] === "disponivel") {
+      estados[dateStr] = "indisponivel";
+      div.classList.add("indisponivel");
+    } else if (estados[dateStr] === "indisponivel") {
+      delete estados[dateStr]; // volta ao normal
+    } else {
+      estados[dateStr] = "disponivel";
+      div.classList.add("disponivel");
+    }
+
+    // Atualiza no Firebase
+    database.ref('casamentos/' + dateStr).set(estados[dateStr]);
+  } else if (senha !== null) {
+    alert("Senha incorreta!");
+  }
+});
         }
-
         grade.appendChild(div);
       }
 
