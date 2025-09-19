@@ -280,15 +280,13 @@ atualizarCalendario();
 div.addEventListener("click", () => {
   const senha = prompt("Digite a senha para alterar:");
   if (senha === senhaCorreta) {
-    // Remove as classes antigas
+    // Remove classes antigas
     div.classList.remove("disponivel", "indisponivel");
 
-    // Atualiza o estado e adiciona a classe correta
+    // Alterna entre verde e vermelho
     if (estados[dateStr] === "disponivel") {
       estados[dateStr] = "indisponivel";
       div.classList.add("indisponivel");
-    } else if (estados[dateStr] === "indisponivel") {
-      delete estados[dateStr]; // volta ao normal
     } else {
       estados[dateStr] = "disponivel";
       div.classList.add("disponivel");
@@ -300,6 +298,7 @@ div.addEventListener("click", () => {
     alert("Senha incorreta!");
   }
 });
+
         }
         grade.appendChild(div);
       }
