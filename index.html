@@ -1,7 +1,4 @@
-meu index completo p vc 
-
-
-<!DOCTYPE html>
+e agr <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
@@ -183,13 +180,31 @@ meu index completo p vc
   <div class="legenda-item"><div class="legenda-color leg-indisponivel"></div>Sábado Indisponível</div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
+  // Configuração do Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyBsaBz3w6plwK2LSKiQRikPRc76J6eXQwo",
+    authDomain: "calendariocasamentos2026.firebaseapp.com",
+    projectId: "calendariocasamentos2026",
+    storageBucket: "calendariocasamentos2026.firebasestorage.app",
+    messagingSenderId: "1044525986593",
+    appId: "1:1044525986593:web:d56628f52f8c3e2a0fc460",
+    measurementId: "G-E73RWEYD95"
+  };
+
+  // Inicializa Firebase
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+
   const ano = 2026;
   const senhaCorreta = "2011";
   const calendarioEl = document.getElementById("calendario");
 
   const mesesNomes = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-  const diasMes = [31,28,31,30,31,30,31,31,30,31,30,31]; // 2026 não é bissexto
+  const diasMes = [31,28,31,30,31,30,31,31,30,31,30,31];
   const diasSemana = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 
   const feriados = {
@@ -215,7 +230,26 @@ meu index completo p vc
     "2026-12-31": { nome: "Véspera de Ano Novo após 14h (facultativo)", tipo: "facultativo" }
   };
 
-  let estados = {};
+ let estados = {};
+
+function atualizarCalendario() {
+  criarCalendario();
+}
+
+// Tenta pegar do Firebase, mas se falhar, usa o local
+try {
+  database.ref('casamentos').on('value', snapshot => {
+    estados = snapshot.val() || {};
+    atualizarCalendario();
+  });
+} catch (e) {
+  console.error("Erro no Firebase, usando calendário local:", e);
+  atualizarCalendario();
+}
+
+// Chamada inicial local
+atualizarCalendario();
+
 
   function criarCalendario() {
     calendarioEl.innerHTML = "";
@@ -231,7 +265,6 @@ meu index completo p vc
       const grade = document.createElement("div");
       grade.classList.add("grade");
 
-      // Cabeçalho dias da semana
       for (let d = 0; d < 7; d++) {
         const div = document.createElement("div");
         div.classList.add("dia-semana");
@@ -239,14 +272,12 @@ meu index completo p vc
         grade.appendChild(div);
       }
 
-      // Espaços vazios antes do 1º dia
       const primeiroDia = new Date(ano, mes, 1).getDay();
       for (let i = 0; i < primeiroDia; i++) {
         const vazio = document.createElement("div");
         grade.appendChild(vazio);
       }
 
-      // Dias do mês
       for (let dia = 1; dia <= diasMes[mes]; dia++) {
         const dateStr = `${ano}-${String(mes+1).padStart(2,"0")}-${String(dia).padStart(2,"0")}`;
         const div = document.createElement("div");
@@ -267,14 +298,12 @@ meu index completo p vc
           div.addEventListener("click", () => {
             const senha = prompt("Digite a senha para alterar:");
             if (senha === senhaCorreta) {
-              if (estados[dateStr] === "disponivel") {
-                estados[dateStr] = "indisponivel";
-              } else if (estados[dateStr] === "indisponivel") {
-                delete estados[dateStr];
-              } else {
-                estados[dateStr] = "disponivel";
-              }
-              criarCalendario();
+              let novoEstado;
+              if (estados[dateStr] === "disponivel") novoEstado = "indisponivel";
+              else if (estados[dateStr] === "indisponivel") novoEstado = null;
+              else novoEstado = "disponivel";
+
+              database.ref('casamentos/' + dateStr).set(novoEstado);
             } else if (senha !== null) {
               alert("Senha incorreta!");
             }
@@ -288,15 +317,8 @@ meu index completo p vc
       calendarioEl.appendChild(mesContainer);
     }
   }
+</script>
 
-  criarCalendario();
-</script>
-<script src="https://unpkg.com/@supabase/supabase-js"></script>
-<script>
-  const SUPABASE_URL = "https://hrhtyrlomctjlqexwsgp.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyaHR5cmxvbWN0amxxZXh3c2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2MTI0MDEsImV4cCI6MjA3MzE4ODQwMX0.aFfdi0wleKGkQPXhBe9yYyk88ELFMoQLLg7gEPQb5JQ";
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-</script>
   
 </body>
 </html>
