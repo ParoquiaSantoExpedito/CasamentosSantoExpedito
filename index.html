@@ -9,160 +9,142 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
-  :root {
-    --fundo: #fdfaf6;
-    --caramelo: #D9B08C;
-    --terracota: #C97C5D;
-    --marrom: #8B5E3C;
-    --verde: #4B7A44;
-    --vermelho: #B54141;
-    --roxo: #6A5ACD;   /* feriado municipal */
-    --laranja: #FFA500; /* ponto facultativo */
-  }
+:root {
+  --fundo: #fdfaf6;
+  --caramelo: #D9B08C;
+  --terracota: #C97C5D;
+  --marrom: #8B5E3C;
+  --verde: #4B7A44;
+  --vermelho: #B54141;
+  --roxo: #6A5ACD;
+  --laranja: #FFA500;
+}
 
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: var(--fundo);
-    margin: 0;
-    padding: 20px;
-    color: #3E2C23;
-  }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--fundo);
+  margin: 0;
+  padding: 20px;
+  color: #3E2C23;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  h1 {
-    text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 25px;
-    color: var(--marrom);
-    font-weight: 600;
-  }
+h1 {
+  text-align: center;
+  font-size: 3rem;
+  margin-bottom: 40px;
+  color: var(--marrom);
+  font-weight: 600;
+}
 
-  #calendario {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
+#calendario {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  justify-items: center;
+}
 
-  .mes {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
+.mes {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
 
-  .mes h2 {
-    text-align: center;
-    margin: 0;
-    padding: 14px;
-    font-size: 1.3rem;
-    background: var(--marrom);
-    color: #fff;
-    letter-spacing: 1px;
-  }
+.mes h2 {
+  text-align: center;
+  margin: 0;
+  padding: 16px;
+  font-size: 1.5rem;
+  background: var(--marrom);
+  color: #fff;
+  letter-spacing: 1px;
+}
 
-  .grade {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
-    padding: 15px;
-  }
+.grade {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  padding: 16px;
+}
 
-  .dia-semana {
-    font-weight: 600;
-    text-align: center;
-    padding: 6px 0;
-    color: var(--terracota);
-    font-size: 0.9rem;
-  }
+.dia-semana {
+  font-weight: 600;
+  text-align: center;
+  padding: 8px 0;
+  color: var(--terracota);
+  font-size: 1rem;
+}
 
-  .dia {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    border-radius: 12px;
-    background: var(--caramelo);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 500;
-    font-size: 0.95rem;
-    cursor: default;
-    transition: all 0.2s ease;
-    position: relative;
-    color: #3E2C23;
-  }
+.dia {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  background: var(--caramelo);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: default;
+  transition: all 0.2s ease;
+  position: relative;
+  color: #3E2C23;
+}
 
-  .dia:hover {
-    transform: scale(1.05);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-  }
+.dia:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
 
-  /* Feriados */
-  .feriado {
-    background: var(--terracota);
-    color: #fff;
-    font-weight: 600;
-  }
-  .feriado-santo {
-    background: #A0522D;
-    color: #fff;
-    font-weight: 600;
-  }
-  .feriado-municipal {
-    background: var(--roxo);
-    color: #fff;
-    font-weight: 600;
-  }
-  .facultativo {
-    background: var(--laranja);
-    color: #fff;
-    font-weight: 600;
-  }
+/* Feriados */
+.feriado { background: var(--terracota); color: #fff; font-weight: 600; }
+.feriado-santo { background: #A0522D; color: #fff; font-weight: 600; }
+.feriado-municipal { background: var(--roxo); color: #fff; font-weight: 600; }
+.facultativo { background: var(--laranja); color: #fff; font-weight: 600; }
 
-  /* Sábados */
-  .disponivel {
-    background: var(--verde) !important;
-    color: #fff;
-    font-weight: 600;
-  }
-  .indisponivel {
-    background: var(--vermelho) !important;
-    color: #fff;
-    font-weight: 600;
-  }
+/* Sábados */
+.disponivel { background: var(--verde) !important; color: #fff; font-weight: 600; }
+.indisponivel { background: var(--vermelho) !important; color: #fff; font-weight: 600; }
 
-  #legenda {
-    max-width: 800px;
-    margin: 40px auto 10px auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-  }
+/* Legenda */
+#legenda {
+  max-width: 800px;
+  margin: 50px auto 20px auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+}
 
-  .legenda-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-    font-size: 0.95rem;
-    color: #3E2C23;
-  }
+.legenda-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  font-size: 1rem;
+  color: #3E2C23;
+}
 
-  .legenda-color {
-    width: 20px;
-    height: 20px;
-    border-radius: 6px;
-  }
+.legenda-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
 
-  .leg-feriado { background: var(--terracota); }
-  .leg-feriado-santo { background: #A0522D; }
-  .leg-feriado-municipal { background: var(--roxo); }
-  .leg-facultativo { background: var(--laranja); }
-  .leg-disponivel { background: var(--verde); }
-  .leg-indisponivel { background: var(--vermelho); }
+.leg-feriado { background: var(--terracota); }
+.leg-feriado-santo { background: #A0522D; }
+.leg-feriado-municipal { background: var(--roxo); }
+.leg-facultativo { background: var(--laranja); }
+.leg-disponivel { background: var(--verde); }
+.leg-indisponivel { background: var(--vermelho); }
+
 </style>
 </head>
 <body>
