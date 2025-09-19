@@ -9,6 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
+* {
+  box-sizing: border-box;
+}
+
 :root {
   --fundo: #fdfaf6;
   --caramelo: #D9B08C;
@@ -45,7 +49,10 @@ h1 {
   gap: 30px;
   max-width: 1200px;
   justify-items: center;
+  width: 100%;          /* ADICIONADO */
+  box-sizing: border-box; /* ADICIONADO */
 }
+
 
 .mes {
   background: #fff;
@@ -144,6 +151,41 @@ h1 {
 .leg-facultativo { background: var(--laranja); }
 .leg-disponivel { background: var(--verde); }
 .leg-indisponivel { background: var(--vermelho); }
+
+  /* RESPONSIVO */
+@media (max-width: 480px) {
+  #calendario {
+    grid-template-columns: 1fr; /* 1 coluna no celular */
+    gap: 20px;
+    padding: 0 10px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  #calendario {
+    grid-template-columns: repeat(2, 1fr); /* 2 colunas em tablets */
+  }
+}
+
+@media (min-width: 769px) {
+  #calendario {
+    grid-template-columns: repeat(3, 1fr); /* 3 colunas no computador */
+  }
+}
+@media (max-width: 480px) {
+  body {
+    padding: 10px; /* diminui o padding para caber na tela */
+  }
+
+  h1 {
+    font-size: 2rem; /* título menor no celular */
+  }
+
+  #calendario {
+    gap: 10px; /* menos espaço entre os meses */
+  }
+}
+
 
 </style>
 </head>
